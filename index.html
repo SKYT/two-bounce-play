@@ -3,9 +3,9 @@
 [hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="records"></p><p id="milestone" aria-live="polite"></p><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">기본 · 끝에서 멈춤</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset class="menu"><legend>선수와 테마</legend><label>테마 프리셋 <select id="preset"><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><button id="applyPreset">코트·공·선수에 적용</button><label>선수 <select id="actor"><option>루키</option><option>가드</option><option>센터</option></select></label>
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
-<label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option></select></label>
+<label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
 <label>유니폼 <select id="jersey"><option>크림</option><option>블루</option><option>레드</option></select></label>
-<label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script>
+<label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option><option value="골드" disabled>골드 헤어밴드 · 3연속</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script>
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),button=document.querySelector('#shoot'),statusLine=document.querySelector('#status');
 const hoop={x:200,y:105},free={x:200,y:330},width=400,height=500;
 let player={...free},ball={...free},phase='ready',start=0,shot=null,scored=0,attempts=0,sequence=0,active=null,audio,soundOn=true;
@@ -27,11 +27,34 @@ const options = document.querySelector('#options');
 const savedLevel = readSetting('difficulty');
 if (Array.from(difficulty.options).some(option => option.value === savedLevel)) difficulty.value = savedLevel;
 soundOn = readSetting('sound') !== 'off';
-const looks = {"actor":["루키","가드","센터"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙"]};
+const looks = {"actor":["루키","가드","센터"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
 const outfit = {};
+let rewards;
+try { rewards = JSON.parse(readSetting('rewards')) || {}; } catch { rewards = {}; }
+let totalGoals = Number.isSafeInteger(rewards.goals) && rewards.goals >= 0 ? rewards.goals : 0;
+let goldBand = rewards.gold === true;
+function refreshRewards() {
+  const ballOption = document.querySelector('#skinBall option[value="클래식"]');
+  ballOption.disabled = totalGoals < 5;
+  ballOption.textContent = ballOption.disabled ? '클래식 농구공 · '+totalGoals+'/5골' : '클래식 농구공';
+  const bandOption = document.querySelector('#band option[value="골드"]');
+  bandOption.disabled = !goldBand;
+  bandOption.textContent = goldBand ? '골드 헤어밴드' : '골드 헤어밴드 · 3연속';
+}
+function awardGoal(streak, notices) {
+  totalGoals++;
+  if (totalGoals === 5) notices.push('클래식 농구공 해금!');
+  if (!goldBand && streak >= 3) {
+    goldBand = true;
+    notices.push('골드 헤어밴드 해금!');
+  }
+  saveSetting('rewards', JSON.stringify({goals:totalGoals, gold:goldBand}));
+  refreshRewards();
+}
+refreshRewards();
 const numberInput = document.querySelector('#jerseyNumber');
 function applyLook(key, value) {
-  const selected = looks[key].includes(value) ? value : looks[key][0];
+  const selected = looks[key].includes(value) && !(value === '클래식' && totalGoals < 5) && !(value === '골드' && !goldBand) ? value : looks[key][0];
   outfit[key] = selected;
   document.getElementById(key).value = selected;
   document.querySelector('#homePlayer').textContent = '선수 · ' + outfit.actor;
@@ -111,7 +134,7 @@ function drawPlayer(x,ground,pose) {
   tile(2-wide,shoulder+2,wide*2-4,hip-shoulder-2,shirt);
   tile(-wide,hip-2,wide*2,6,'#34445a');
   sprite(-9,shoulder-19,['..kkkkk..','.khhhhkk.','khhhhkhhk','khssssssk','.kssksksk','.ksssssks','..kssssk.','...kkkk..'],{k:ink,h:'#704638',s:skin});
-  if(outfit.band!=='없음') tile(-7,shoulder-13,14,3,outfit.band==='화이트'?'#fff5de':'#202331');
+  if(outfit.band!=='없음') tile(-7,shoulder-13,14,3,outfit.band==='화이트'?'#fff5de':outfit.band==='골드'?'#ffcb44':'#202331');
   ctx.save();ctx.scale(face,1);ctx.fillStyle=ink;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(numberInput.value,0,shoulder+10);ctx.restore();
   const wristX=(hand.x-x)*face-2, wristY=hand.y-ground+pose.jump+5;
   limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,shade);
@@ -121,7 +144,7 @@ function drawPlayer(x,ground,pose) {
   return hand;
 }
 function drawBall(x,y) {
-  sprite(x-8,y-8,['..kkkk..','.khlhlk.','khhlhhlk','kllllllk','kbbblbbk','kbblbblk','.kblblk.','..kkkk..'],{k:ink,l:'#664739',h:'#fff3c3',b:{오렌지:'#ff983b',아이스:'#bceeff',라임:'#d6ff65'}[outfit.skinBall]});
+  sprite(x-8,y-8,['..kkkk..','.khlhlk.','khhlhhlk','kllllllk','kbbblbbk','kbblbblk','.kblblk.','..kkkk..'],{k:ink,l:'#664739',h:'#fff3c3',b:{오렌지:'#ff983b',아이스:'#bceeff',라임:'#d6ff65',클래식:'#c26f37'}[outfit.skinBall]});
 }
 function drawHoop() {
   tile(169,66,62,37,ink); tile(172,69,56,31,'#b4ebdf');tile(175,71,50,27,'#eaf7ed');
@@ -248,6 +271,7 @@ function recordShot(hit) {
   const record = getRecord(session);
   const nextTier = tierAt(session,scored);
   const notices = [];
+  if (hit) awardGoal(streak, notices);
   if(nextTier>band.tier) notices.push(scored+'골 달성 · 다음 슛 Lv.'+nextTier);
   if(nextTier>record.reached){record.reached=nextTier;saveSetting('reached:'+key,nextTier);}
   if ([3, 5, 10].includes(streak)) notices.push(streak + '연속!');
