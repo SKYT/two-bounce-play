@@ -1,0 +1,395 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드</title><style>
+*{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:520px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:32px;margin:0}canvas{image-rendering:pixelated;width:100%;height:min(62dvh,540px);display:block;background:#216563;border-radius:16px;margin:14px 0;touch-action:none}button,select{font:inherit;border:0;border-radius:10px;padding:10px;background:#fff4d3;color:#142d2e}#shoot{width:100%;touch-action:none;user-select:none;background:#ffc158;font-weight:800;font-size:20px;padding:14px}footer{margin-top:12px}p{min-height:1.5em;margin:8px 0}
+[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="records"></p><p id="milestone" aria-live="polite"></p><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">기본 · 끝에서 멈춤</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
+<label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset class="menu"><legend>선수와 테마</legend><label>테마 프리셋 <select id="preset"><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><button id="applyPreset">코트·공·선수에 적용</button><label>선수 <select id="actor"><option>루키</option><option>가드</option><option>센터</option></select></label>
+<label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
+<label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option></select></label>
+<label>유니폼 <select id="jersey"><option>크림</option><option>블루</option><option>레드</option></select></label>
+<label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script>
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),button=document.querySelector('#shoot'),statusLine=document.querySelector('#status');
+const hoop={x:200,y:105},free={x:200,y:330},width=400,height=500;
+let player={...free},ball={...free},phase='ready',start=0,shot=null,scored=0,attempts=0,sequence=0,active=null,audio,soundOn=true;
+const difficulty = document.querySelector('#level');
+const records = document.querySelector('#records');
+const milestone = document.querySelector('#milestone');
+const haptic = document.querySelector('#haptic');
+function readSetting(key) {
+  try { return localStorage.getItem('two-bounce:' + key); } catch { return null; }
+}
+function saveSetting(key, value) {
+  try { localStorage.setItem('two-bounce:' + key, String(value)); } catch {}
+}
+const home = document.querySelector('#home');
+const court = document.querySelector('#court');
+const settings = document.querySelector('#settings');
+const play = document.querySelector('#play');
+const options = document.querySelector('#options');
+const savedLevel = readSetting('difficulty');
+if (Array.from(difficulty.options).some(option => option.value === savedLevel)) difficulty.value = savedLevel;
+soundOn = readSetting('sound') !== 'off';
+const looks = {"actor":["루키","가드","센터"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙"]};
+const outfit = {};
+const numberInput = document.querySelector('#jerseyNumber');
+function applyLook(key, value) {
+  const selected = looks[key].includes(value) ? value : looks[key][0];
+  outfit[key] = selected;
+  document.getElementById(key).value = selected;
+  document.querySelector('#homePlayer').textContent = '선수 · ' + outfit.actor;
+  canvas.style.backgroundColor = {그린:'#216563', 야간:'#213451', 우드:'#835838'}[outfit.floor] || '#216563';
+}
+for (const key of Object.keys(looks)) {
+  applyLook(key, readSetting('look-' + key));
+  document.getElementById(key).onchange = event => {
+    applyLook(key, event.target.value);
+    saveSetting('look-' + key, outfit[key]);
+  };
+}
+const savedNumber = readSetting('jerseyNumber');
+numberInput.value = /^\d{1,2}$/.test(savedNumber) ? savedNumber : '7';
+numberInput.onchange = () => {
+  numberInput.value = /^\d{1,2}$/.test(numberInput.value) ? numberInput.value : '7';
+  saveSetting('jerseyNumber', numberInput.value);
+};
+document.querySelector('#applyPreset').onclick = () => {
+  const index = document.querySelector('#preset').selectedIndex;
+  for (const key of ['floor', 'skinBall', 'actor']) {
+    applyLook(key, looks[key][index]);
+    saveSetting('look-' + key, outfit[key]);
+  }
+};
+const ink = '#302535';
+function tile(x,y,w,h,color) {
+  ctx.fillStyle=color;
+  ctx.fillRect(Math.round(x),Math.round(y),w,h);
+}
+// Square stamps keep diagonal limbs and the net on the same pixel grid.
+function pixelLine(x,y,endX,endY,size,color) {
+  const steps=Math.max(1,Math.ceil(Math.hypot(endX-x,endY-y)));
+  for(let i=0;i<=steps;i++) tile(x+(endX-x)*i/steps-size/2,y+(endY-y)*i/steps-size/2,size,size,color);
+}
+function sprite(x,y,rows,palette) {
+  rows.forEach((row,dy)=>Array.from(row).forEach((key,dx)=>{
+    if(palette[key]) tile(x+dx*2,y+dy*2,2,2,palette[key]);
+  }));
+}
+function poseAt(power,flightMs) {
+  const lift=Math.min(1,power*1.6);
+  const air=flightMs===null?0:Math.min(1,Math.max(0,flightMs/410));
+  const reach=flightMs===null?lift:(lift+(1-lift)*Math.min(1,air*8))*(1-air);
+  const bend=flightMs===null?Math.sin(lift*Math.PI):Math.sin(lift*Math.PI)*Math.max(0,1-air*8)+Math.max(0,1-Math.abs(air-.82)*6);
+  return {reach,bend,jump:flightMs===null?lift*12:lift*12*(1-air)+10*Math.sin(air*Math.PI)};
+}
+function handPosition(x,ground,pose) {
+  const height={루키:0,가드:-2,센터:4}[outfit.actor];
+  const face=x>hoop.x?-1:1;
+  return {x:x+face*(13-6*pose.reach),y:ground-24-height-pose.jump+5*pose.bend-24*pose.reach};
+}
+function drawPlayer(x,ground,pose) {
+  const face=x>hoop.x?-1:1;
+  const tall={루키:0,가드:-2,센터:4}[outfit.actor];
+  const wide={루키:8,가드:7,센터:10}[outfit.actor];
+  const hip=-15+5*pose.bend;
+  const shoulder=hip-12-tall;
+  const skin='#f8b875', shade='#c57952';
+  const shirt={크림:'#ffe3a2',블루:'#79caff',레드:'#ff765e'}[outfit.jersey];
+  const hand=handPosition(x,ground,pose);
+  tile(x-12,ground-1,24,3,'#143f43');
+  ctx.save();
+  ctx.translate(Math.round(x),Math.round(ground-pose.jump));
+  ctx.scale(face,1);
+  function limb(ax,ay,bx,by,cx,cy,color) {
+    for(const [size,tint] of [[7,ink],[4,color]]) {
+      pixelLine(ax,ay,bx,by,size,tint); pixelLine(bx,by,cx,cy,size,tint);
+    }
+  }
+  for(const side of [-1,1]) {
+    const foot=side*6;
+    limb(side*4,hip,foot+2+5*pose.bend,-8+pose.bend,foot,-3,side<0?shade:skin);
+    tile(foot-3,-4,10,5,ink);tile(foot-2,-4,7,3,'#fff3d2');
+  }
+  tile(-wide,shoulder,wide*2,hip-shoulder+3,ink);
+  tile(2-wide,shoulder+2,wide*2-4,hip-shoulder-2,shirt);
+  tile(-wide,hip-2,wide*2,6,'#34445a');
+  sprite(-9,shoulder-19,['..kkkkk..','.khhhhkk.','khhhhkhhk','khssssssk','.kssksksk','.ksssssks','..kssssk.','...kkkk..'],{k:ink,h:'#704638',s:skin});
+  if(outfit.band!=='없음') tile(-7,shoulder-13,14,3,outfit.band==='화이트'?'#fff5de':'#202331');
+  ctx.save();ctx.scale(face,1);ctx.fillStyle=ink;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(numberInput.value,0,shoulder+10);ctx.restore();
+  const wristX=(hand.x-x)*face-2, wristY=hand.y-ground+pose.jump+5;
+  limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,shade);
+  limb(wide-2,shoulder+4,wide+5,shoulder+12-21*pose.reach,wristX,wristY,skin);
+  pixelLine(wristX,wristY,wristX+4,wristY-2+4*pose.reach,3,skin);
+  ctx.restore();
+  return hand;
+}
+function drawBall(x,y) {
+  sprite(x-8,y-8,['..kkkk..','.khlhlk.','khhlhhlk','kllllllk','kbbblbbk','kbblbblk','.kblblk.','..kkkk..'],{k:ink,l:'#664739',h:'#fff3c3',b:{오렌지:'#ff983b',아이스:'#bceeff',라임:'#d6ff65'}[outfit.skinBall]});
+}
+function drawHoop() {
+  tile(169,66,62,37,ink); tile(172,69,56,31,'#b4ebdf');tile(175,71,50,27,'#eaf7ed');
+  tile(188,80,24,18,'#5b93a2');tile(191,83,18,12,'#d9f3eb');
+  for(let i=-12;i<=12;i+=6) {
+    pixelLine(200+i,106,200+i*.55+2,121,2,'#ffefd0');
+    pixelLine(200+i,106,200+i*.55-2,121,1,'#acd0cc');
+  }
+  tile(185,101,30,7,ink);tile(187,102,26,4,'#ff913e');tile(190,103,20,1,ink);
+}
+const tiers = [
+  {width:.45, shift:.06}, {width:.30, shift:.09}, {width:.18, shift:.12},
+  {width:.14, shift:.15}, {width:.10, shift:.18}
+];
+const starts = {'.45':1, '.18':3, '.10':5};
+const labels = {'.45':'쉬움', '.18':'보통', '.10':'어려움'};
+const modes = ['randomBand','promotion','fadeBand'].map(id => document.getElementById(id));
+const ledger = new Map();
+let session, band;
+const motion = document.querySelector('#motion');
+const pace = document.querySelector('#pace');
+for (const select of [motion, pace]) {
+  const saved = readSetting(select.id);
+  if (Array.from(select.options).some(option => option.value === saved)) select.value = saved;
+  select.onchange = () => { saveSetting(select.id, select.value); refreshRecords(); };
+}
+function gaugePower(profile, tier, elapsed) {
+  const durations = {classic:950, auto:tier <= 2 ? 1200 : 1000, slow:1200, normal:1000, fast:750};
+  const travel = Math.max(0, elapsed) / durations[profile.pace];
+  if (profile.motion === 'bounce') return 1 - Math.abs(1 - travel % 2);
+  if (profile.motion === 'dial') return travel % 1;
+  return Math.min(1, travel);
+}
+function settingsProfile() {
+  const [random, promote, fade] = modes.map(control => control.checked);
+  return {level:difficulty.value, motion:motion.value, pace:pace.value, random, promote, fade};
+}
+function profileKey(p) {
+  const flags = [p.random,p.promote,p.fade].map(Number).join('');
+  const base = flags === '000' ? p.level : p.level + ':' + flags;
+  return p.motion === 'classic' && p.pace === 'classic' ? base : [base,p.motion,p.pace].join(':');
+}
+function tierAt(p, goals) {
+  return Math.min(5, starts[p.level] + (p.promote ? Math.floor(goals/10) : 0));
+}
+function prepareBand(p, goals, base, first, rng=Math.random) {
+  const tier = tierAt(p, goals);
+  const {width, shift} = tiers[tier-1];
+  let center = base;
+  if (p.random && !first) {
+    const low = Math.max(.05 + width/2, base-shift);
+    const high = Math.min(.95 - width/2, base+shift);
+    center = low + rng()*(high-low);
+  }
+  return {tier, center, width, low:center-width/2, high:center+width/2};
+}
+function prepareNextShot(first) {
+  band = prepareBand(session, scored, target(player), first);
+  const progress = session.promote && band.tier<5 ? ' · '+scored+'/'+(Math.floor(scored/10)*10+10)+'골' : '';
+  document.querySelector('#tierStatus').textContent = 'Lv.'+band.tier+(band.tier===5?' · 최고 단계':'')+progress;
+}
+function opacityAt(tier, elapsed, enabled) {
+  if (!enabled || tier<4) return 1;
+  const [delay,duration,floor] = tier===4 ? [150,400,.25] : [100,300,0];
+  return 1-(1-floor)*Math.min(1,Math.max(0,(elapsed-delay)/duration));
+}
+function getRecord(p) {
+  const key = profileKey(p);
+  if (!ledger.has(key)) ledger.set(key,{
+    best:Math.max(0,Number(readSetting('best:'+key))||0),
+    reached:Math.min(5,Math.max(starts[p.level],Number(readSetting('reached:'+key))||0))
+  });
+  return ledger.get(key);
+}
+function listRecords() {
+  const list = document.querySelector('#rankList');
+  list.replaceChildren();
+  for (const level of ['.45','.18','.10']) {
+    const rows=[];
+    for(let flags=0;flags<8;flags++) {
+      const p={level,random:Boolean(flags&4),promote:Boolean(flags&2),fade:Boolean(flags&1)};
+      for (const shape of motion.options) {
+        for (const speed of pace.options) {
+          const profile = {...p, motion:shape.value, pace:speed.value};
+          const record = getRecord(profile);
+          if (record.best) rows.push({p:profile, record, modeLabel:shape.text, speedLabel:speed.text});
+        }
+      }
+    }
+    rows.sort((a,b)=>b.record.best-a.record.best);
+    for(const {p,record,modeLabel,speedLabel} of rows) {
+      const item=document.createElement('li');
+      const options=[p.random&&'랜덤',p.promote&&'승급',p.fade&&'숨김'].filter(Boolean).join(' · ')||'기본';
+      item.textContent=labels[level]+' · '+record.best+'연속 · Lv.'+starts[level]+' → Lv.'+record.reached+' · '+options+' · '+modeLabel+' · '+speedLabel;
+      list.append(item);
+    }
+  }
+  if(!list.children.length) list.textContent='첫 득점 후 기록이 표시됩니다.';
+}
+let streak = 0;
+let hapticsOn = readSetting('haptics') !== 'off';
+function refreshRecords() {
+  const p=settingsProfile();
+  const best=getRecord(p).best;
+  document.querySelector('#homeRecord').textContent=labels[p.level]+' · 최고 '+best+'연속';
+  records.textContent='현재 '+streak+'연속 · 같은 조건 최고 '+best+'연속';
+  document.querySelector('#promotionHint').textContent=starts[p.level]===5?'최고 단계에서 시작해요':'';
+}
+for (const control of modes) {
+  control.checked=readSetting(control.id)==='on';
+  control.onchange=()=>{saveSetting(control.id,control.checked?'on':'off');refreshRecords();};
+}
+document.querySelector('#ranking').ontoggle=event=>{if(event.target.open) listRecords();};
+function refreshHaptics() {
+  haptic.textContent = hapticsOn ? '진동 켜짐' : '진동 꺼짐';
+  haptic.setAttribute('aria-pressed', String(hapticsOn));
+}
+function vibrate(pattern) {
+  if (hapticsOn) navigator.vibrate?.(pattern);
+}
+function recordShot(hit) {
+  streak = hit ? streak + 1 : 0;
+  const key = profileKey(session);
+  const record = getRecord(session);
+  const nextTier = tierAt(session,scored);
+  const notices = [];
+  if(nextTier>band.tier) notices.push(scored+'골 달성 · 다음 슛 Lv.'+nextTier);
+  if(nextTier>record.reached){record.reached=nextTier;saveSetting('reached:'+key,nextTier);}
+  if ([3, 5, 10].includes(streak)) notices.push(streak + '연속!');
+  if (streak > record.best) {
+    record.best=streak;
+    saveSetting('best:' + key, streak);
+    notices.push('개인 최고 경신');
+  }
+  milestone.textContent = notices.join(' · ');
+  refreshRecords();
+}
+difficulty.onchange = () => { saveSetting('difficulty', difficulty.value); streak = 0; milestone.textContent = ''; refreshRecords(); };
+haptic.onclick = () => {
+  hapticsOn = !hapticsOn;
+  saveSetting('haptics', hapticsOn ? 'on' : 'off');
+  refreshHaptics();
+};
+refreshRecords();
+refreshHaptics();
+const lerp=(a,b,t)=>a+(b-a)*t;
+function distance(p){return Math.hypot(p.x-hoop.x,p.y-hoop.y)}
+function target(p){return Math.min(.84,.25+distance(p)/600)}
+function outside(p){return p.x<16||p.x>384||p.y<52||p.y>478||distance(p)>320}
+function nextSpot(p){return outside(p)?{...free}:{...p}}
+function tone(freq,time){if(!soundOn||!audio||audio.state!=='running')return;const osc=audio.createOscillator(),gain=audio.createGain();osc.frequency.setValueAtTime(freq,audio.currentTime);osc.frequency.exponentialRampToValueAtTime(freq*.45,audio.currentTime+time);gain.gain.setValueAtTime(.12,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+time);osc.connect(gain);gain.connect(audio.destination);osc.start();osc.stop(audio.currentTime+time)}
+function press(id){if(court.hidden||phase!=='ready'||active!==null)return false;active=id;difficulty.disabled=true;try{audio??=new AudioContext();audio.resume().catch(()=>{})}catch{}phase='hold';start=performance.now();statusLine.textContent='목표 띠에서 손을 떼세요 · 중앙은 PERFECT';return true}
+function judgeShot(power, band) {
+  if (power < band.low || power > band.high) return 'miss';
+  const radius = band.width / 8;
+  return power >= band.center - radius && power <= band.center + radius ? 'perfect' : 'goal';
+}
+function swish() {
+  if (!soundOn || !audio || audio.state !== 'running') return;
+  const buffer = audio.createBuffer(1, Math.ceil(audio.sampleRate * .15), audio.sampleRate);
+  const samples = buffer.getChannelData(0);
+  for (let i = 0; i < samples.length; i++) samples[i] = (Math.random()*2-1) * .25 * (1-i/samples.length)**3;
+  const noise = audio.createBufferSource();
+  const filter = audio.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 2800;
+  noise.buffer = buffer;
+  noise.connect(filter);
+  filter.connect(audio.destination);
+  noise.onended = () => { noise.disconnect(); filter.disconnect(); };
+  noise.start();
+}
+function release(id){if(id!==active||phase!=='hold')return;active=null;const power=gaugePower(session,band.tier,performance.now()-start),error=power-band.center,grade=judgeShot(power,band),hit=grade!=='miss';
+const angle=hit?Math.PI*(.25+Math.random()*.50):Math.PI*(error<0?.28:.72)+(Math.random()-.5)*1.4,range=hit?48+Math.random()*55:110+Math.abs(error)*380;
+shot={origin:handPosition(player.x,player.y,poseAt(power,null)),from:{...player},power,hit,perfect:grade==='perfect',end:{x:hoop.x+Math.cos(angle)*range,y:hoop.y+Math.sin(angle)*range},contact:hit?hoop.x:hoop.x+(error<0?-14:14)};phase='flight';sequence=0;start=performance.now();attempts++;statusLine.textContent='슛';tone(400,.07)}
+function cancel(){active=null;if(phase==='hold'){phase='ready';difficulty.disabled=false;statusLine.textContent='다시 누르면 점프해요'}}
+for(const surface of [canvas,button]){surface.onpointerdown=e=>{if(e.button===0&&press(e.pointerId)){surface.setPointerCapture(e.pointerId);e.preventDefault()}};surface.onpointerup=e=>release(e.pointerId);surface.onpointercancel=e=>{if(active===e.pointerId)cancel()}}
+button.onkeydown=e=>{if([' ','Enter'].includes(e.key)){e.preventDefault();if(!e.repeat)press('key')}};button.onkeyup=e=>{if([' ','Enter'].includes(e.key))release('key')};window.addEventListener('blur',cancel);
+const soundButton = document.querySelector('#sound');
+function refreshSound() {
+  soundButton.textContent = soundOn ? '소리 켜짐' : '소리 꺼짐';
+  soundButton.setAttribute('aria-pressed', String(soundOn));
+}
+refreshSound();
+soundButton.onclick = () => {
+  soundOn = !soundOn;
+  saveSetting('sound', soundOn ? 'on' : 'off');
+  refreshSound();
+};
+function showScreen(screen) {
+  for (const section of [home, court, settings]) section.hidden = section !== screen;
+}
+options.onclick = () => { showScreen(settings); difficulty.focus(); };
+document.querySelector('#back').onclick = () => { showScreen(home); options.focus(); };
+let animation = 0;
+play.onclick = () => {
+  player = {...free};
+  ball = {...free};
+  phase = 'ready';
+  active = null;
+  shot = null;
+  scored = attempts = sequence = streak = 0;
+  session=settingsProfile();
+  prepareNextShot(true);
+  goalAt = -Infinity;
+  difficulty.disabled = false;
+  document.querySelector('#score').textContent = '0 / 0 슛';
+  milestone.textContent = '';
+  statusLine.textContent = '자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요';
+  refreshRecords();
+  showScreen(court);
+  button.focus();
+  animation = requestAnimationFrame(frame);
+};
+document.querySelector('#leave').onclick = () => {
+  cancelAnimationFrame(animation);
+  cancel();
+  difficulty.disabled = false;
+  showScreen(home);
+  if(document.querySelector("#ranking").open) listRecords();
+  play.focus();
+};
+function circle(x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+function line(x,y,X,Y,color,w){ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(X,Y);ctx.stroke()}
+let goalAt = -Infinity;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function drawGoal(now) {
+  const progress = (now - goalAt) / 570;
+  if (progress >= 1) return;
+  ctx.save();
+  if (!reducedMotion.matches) {
+    ctx.globalAlpha = 1 - progress;
+    ctx.strokeStyle = '#ffe375';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(hoop.x, hoop.y, 16 + 42 * progress, 0, Math.PI * 2);
+    ctx.stroke();
+    for (let i = 0; i < 20; i++) {
+      const angle = i * Math.PI / 10;
+      const radius = 18 + progress * (i % 2 ? 56 : 38);
+      circle(hoop.x + Math.cos(angle) * radius, hoop.y + Math.sin(angle) * radius, 3, i % 2 ? '#fff4ce' : '#ffc158');
+    }
+  }
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 26px system-ui';
+  ctx.fillStyle = '#fff4ce';
+  ctx.fillText(shot?.perfect ? 'PERFECT' : '골!', hoop.x, hoop.y - 32);
+  ctx.restore();
+}
+function frame(now){if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height}ctx.clearRect(0,0,width,height);
+ctx.strokeStyle='#86aaa0';ctx.lineWidth=2;ctx.strokeRect(16,52,368,426);ctx.strokeRect(132,52,136,278);ctx.beginPath();ctx.arc(200,330,68,0,Math.PI);ctx.stroke();drawHoop();
+let elapsed=Math.max(0,now-start),power=phase==='hold'?gaugePower(session,band.tier,elapsed):0;
+if(phase==='flight'){let t=Math.min(1,elapsed/620);ball={x:lerp(shot.origin.x,shot.contact,t),y:lerp(shot.origin.y,105,t)-95*Math.sin(Math.PI*t)};if(t===1){phase='bounce';start=now;if(shot.hit){scored++;goalAt=now;vibrate([30,45,30])}recordShot(shot.hit);score.textContent=scored+' / '+attempts+' 슛';if(shot.perfect)swish();else tone(shot.hit?740:310,.13);statusLine.textContent=shot.perfect?'PERFECT · 다음 바운드를 보세요':shot.hit?'득점 · 다음 바운드를 보세요':'림 · 다음 바운드를 보세요'}}
+if(phase==='bounce'){const t=Math.min(1,(now-start)/890),first=.56,u=t<first?t/first:(t-first)/(1-first);ball={x:lerp(shot.contact,shot.end.x,t),y:lerp(105,shot.end.y,t)-(t<first?32*(1-u)+42*Math.sin(Math.PI*u):34*Math.sin(Math.PI*u))};if(t>=first&&sequence===0){tone(155,.13);vibrate(10);sequence=1}if(t===1){tone(125,.12);vibrate(10);difficulty.disabled=false;player=nextSpot(shot.end);prepareNextShot(false);phase='ready';statusLine.textContent=outside(shot.end)?'범위 이탈 · 자유투 라인에서 다시 시작':'두 번째 바운드 · 이 자리에서 다음 슛'}}
+let px=player.x,py=player.y;if(phase==='bounce'){const t=Math.min(1,(now-start)/890);px=lerp(px,shot.end.x,t);py=lerp(py,shot.end.y,t)}
+const pose=poseAt(phase==='flight'?shot.power:power,phase==='flight'?Math.max(0,now-start):null);const hand=drawPlayer(px,py,pose);if(phase==='ready'||phase==='hold')ball=hand;drawBall(ball.x,ball.y);
+if((phase==='ready'||phase==='hold') && session.motion==='dial'){
+  const cx=px>320?px-35:px+35, cy=Math.max(24,py-63), radius=18;
+  const angle=value=>(value*2-.5)*Math.PI;
+  ctx.save();
+  ctx.lineWidth=7;
+  ctx.strokeStyle='#123a39';
+  ctx.beginPath();ctx.arc(cx,cy,radius,0,2*Math.PI);ctx.stroke();
+  ctx.globalAlpha=opacityAt(band.tier,elapsed,session.fade && phase==='hold');
+  ctx.strokeStyle='#99f1aa';
+  ctx.beginPath();ctx.arc(cx,cy,radius,angle(band.low),angle(band.high));ctx.stroke();
+  ctx.restore();
+  line(cx,cy,cx+21*Math.cos(angle(power)),cy+21*Math.sin(angle(power)),'white',3);
+}else if(phase==='ready'||phase==='hold'){const x=px>320?px-34:px+26,y=py-80,span=band.width;ctx.fillStyle='#123a39';ctx.fillRect(x,y,14,74);ctx.save();ctx.globalAlpha=opacityAt(band.tier,elapsed,session.fade && phase==='hold');ctx.fillStyle='#99f1aa';ctx.fillRect(x,y+74*(1-band.high),14,74*span);ctx.restore();line(x-3,y+74*(1-power),x+17,y+74*(1-power),'white',3)}
+drawGoal(now);animation=requestAnimationFrame(frame)}
+</script></html>
