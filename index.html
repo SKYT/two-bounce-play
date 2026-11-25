@@ -56,9 +56,9 @@ function awardGoal(streak, notices) {
 refreshRewards();
 const numberInput = document.querySelector('#jerseyNumber');
 const skinPalettes = {
-  light: {skin:'#f6d5bf', shade:'#e8bfa8'},
-  golden: {skin:'#d6a366', shade:'#c7965e'},
-  deep: {skin:'#815139', shade:'#714632'}
+  light: {skin:'#f6d5bf', shade:'#d39e89', light:'#ffe9d7'},
+  golden: {skin:'#d6a366', shade:'#ae7548', light:'#efbf85'},
+  deep: {skin:'#815139', shade:'#613b31', light:'#aa7353'}
 };
 const defaultTones = {루키:'light', 가드:'golden', 센터:'deep', 번개:'golden'};
 const playerTones = {};
@@ -159,27 +159,34 @@ function makeRenderer(ctx) {
     const wide={루키:8,가드:7,센터:10,번개:9}[actor];
     const hip=(actor==='번개'?-19:-16)+5*pose.bend;
     const shoulder=hip-12-tall;
-    const {skin,shade} = skinPalettes[playerTones[actor]];
+    const {skin,shade,light} = skinPalettes[playerTones[actor]];
     const santa = outfit.costume === '크리스마스 산타';
     const shirt=santa ? '#d53a42' : {크림:'#ffe3a2',블루:'#79caff',레드:'#ff765e'}[outfit.jersey];
+    const trim=santa?'#96293b':{크림:'#c79559',블루:'#3983ae',레드:'#bc5249'}[outfit.jersey];
     const hand=handPosition(x,ground,pose,actor);
     tile(x-12,ground-1,24,3,'#143f43');
     ctx.save();
     ctx.translate(Math.round(x),Math.round(ground-pose.jump));
     ctx.scale(face,1);
     function limb(ax,ay,bx,by,cx,cy,color) {
-      for(const [size,tint] of [[9,ink],[6,color]]) {
+      for(const [size,tint] of [[9,ink],[7,shade],[5,color]]) {
         pixelLine(ax,ay,bx,by,size,tint); pixelLine(bx,by,cx,cy,size,tint);
       }
+      tile(bx-2,by-2,3,2,light);
     }
     for(const side of [-1,1]) {
       const foot=side*6;
       limb(side*4,hip,foot+2+5*pose.bend,-8+pose.bend,foot,-3,skin);
-      tile(foot-3,-4,10,5,ink);tile(foot-2,-4,7,3,'#fff3d2');
+      tile(foot-3,-4,10,5,ink);tile(foot-2,-5,4,2,'#d5d8cc');tile(foot-2,-3,7,3,shirt);tile(foot,-3,3,1,'#fff3d2');tile(foot-2,0,8,1,'#c5bcae');
     }
     tile(-wide,shoulder,wide*2,hip-shoulder+3,ink);
     tile(2-wide,shoulder+2,wide*2-4,hip-shoulder-2,shirt);
     tile(-wide,hip-2,wide*2,7,'#34445a');
+    tile(2-wide,shoulder+4,3,hip-shoulder-6,trim);
+    tile(wide-5,hip-6,3,4,trim);
+    tile(wide-6,shoulder+2,4,2,'#fff2cd');
+    tile(-wide+1,hip,wide*2-2,2,'#536681');
+    tile(-wide+2,hip+2,2,3,shirt);
     if (actor === '번개' && !santa) {
       tile(2-wide,shoulder+2,4,5,'#248c91');
       tile(4-wide,shoulder+7,3,3,'#248c91');
@@ -197,10 +204,10 @@ function makeRenderer(ctx) {
     if (actor === '번개') {
       sprite(-11,shoulder-17,[
         '..kk..kkk..','..khkkhhkk.','.khhhhhhhhk',
-        'khhhtthhhhk','khhsskksssk','.ksssksskek',
+        'khhhtthhhhk','khhsskkllsk','.ksssksskek',
         '.ksssssnnsk','..ksssssksk','...kkssskk.','.....kkk...'
-      ],{k:ink,h:'#352f51',t:'#69d6ca',s:skin,n:shade,e:'#fff3d2'});
-    } else sprite(-9,shoulder-17,['..kkkkk..','.khhhhkk.','khhhhkhhk','khssssssk','.kssksksk','.ksssssks','..kssssk.','...kkkk..'],{k:ink,h:'#704638',s:skin});
+      ],{k:ink,h:'#352f51',t:'#69d6ca',s:skin,l:light,n:shade,e:'#fff3d2'});
+    } else sprite(-9,shoulder-17,['..kkkkk..','.khhaakk.','khhhhkhhk','khnsllssk','.knskskek','.knssslks','..knnssk.','...kkkk..'],{k:ink,h:'#704638',a:'#a46b4d',s:skin,n:shade,l:light,e:'#fff2d7'});
     if (santa) {
       sprite(-15,shoulder-27,[
         '....rrrrr...',
