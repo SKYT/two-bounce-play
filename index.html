@@ -1,13 +1,13 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드</title><style>
 *{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:520px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:32px;margin:0}canvas{image-rendering:pixelated;width:100%;height:min(62dvh,540px);display:block;background:#216563;border-radius:16px;margin:14px 0;touch-action:none}button,select{font:inherit;border:0;border-radius:10px;padding:10px;background:#fff4d3;color:#142d2e}#shoot{width:100%;touch-action:none;user-select:none;background:#ffc158;font-weight:800;font-size:20px;padding:14px}footer{margin-top:12px}p{min-height:1.5em;margin:8px 0}
-[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v18 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
+[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v19 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
 <label>선수 피부톤 <select id="skinTone"><option value="light">밝은 톤</option><option value="golden">따뜻한 중간 톤</option><option value="deep">짙은 톤</option></select></label>
 <label>코스튬 <select id="costume"><option>기본</option><option>크리스마스 산타</option></select></label>
 <label>유니폼 <select id="jersey"><option>크림</option><option>블루</option><option>레드</option></select></label>
-<label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option><option value="골드" disabled>골드 헤어밴드 · 3연속</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script>
+<label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option><option value="골드" disabled>골드 헤어밴드 · 3연속</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script src="./player-atlas.js"></script><script>
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),button=document.querySelector('#shoot'),statusLine=document.querySelector('#status');
 const hoop={x:200,y:105},free={x:200,y:330},width=400,height=500;
 let player={...free},ball={...free},phase='ready',start=0,shot=null,scored=0,attempts=0,sequence=0,active=null,audio,soundOn=true;
@@ -147,6 +147,31 @@ const playerArt = {
   루키:[45,1.82], 가드:[43,1.76], 센터:[49,2.06], 번개:[52,1.93],
   '준 · 남자 7등신':[61,1.98], '서진 · 여자 7등신':[61,1.85]
 };
+const referenceSheet=new Image();
+const referenceColors=new Map();
+referenceSheet.onload=()=>refreshPortraits();
+if(window.twoBounceAtlas)referenceSheet.src=window.twoBounceAtlas;
+function referenceBody(actor,cloth){
+  const tone=skinPalettes[playerTones[actor]].skin;
+  const key=actor+tone+cloth;
+  if(referenceColors.has(key))return referenceColors.get(key);
+  const layer=document.createElement('canvas');layer.width=128;layer.height=64;
+  const brush=layer.getContext('2d');
+  brush.drawImage(referenceSheet,actor.startsWith('서진')?128:0,0,128,64,0,0,128,64);
+  const image=brush.getImageData(0,0,128,64),p=image.data;
+  const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
+  const skin=rgb(tone),jersey=rgb(cloth);
+  for(let i=0;i<p.length;i+=4){
+    if(!p[i+3])continue;
+    const y=Math.floor(i/4/128),r=p[i],g=p[i+1],b=p[i+2];
+    if(y>21 && Math.max(r,g,b)-Math.min(r,g,b)<27){
+      for(let k=0;k<3;k++)p[i+k]=jersey[k]*(r+g+b)/630;
+    }else if(r>85 && r>g*1.14 && g>b*1.10){
+      for(let k=0;k<3;k++)p[i+k]=skin[k]*r/218;
+    }
+  }
+  brush.putImageData(image,0,0);referenceColors.set(key,layer);return layer;
+}
 function makeRenderer(ctx) {
   function tile(x,y,w,h,color) {
     ctx.fillStyle=color;
@@ -169,10 +194,7 @@ function makeRenderer(ctx) {
     const hip=-31+9*pose.bend, shoulder=hip-19, width=pony?6:7;
     const {skin,shade,light}=skinPalettes[playerTones[actor]];
     const santa=outfit.costume==='크리스마스 산타';
-    const cloth=santa?'#c83f49':{블루:'#69b8e7',크림:pony?'#e7e6df':'#a6a6a3',레드:'#e66654'}[outfit.jersey];
-    const view=ctx.canvas===canvas?document.getElementById('camera').value:'front';
-    const back=view==='top', profile=view==='side';
-    const seam=santa?'#9d3340':{블루:'#4587aa',크림:'#80817e',레드:'#af493f'}[outfit.jersey];
+    const cloth=santa?'#c83f49':{블루:'#69b8e7',크림:'#efd293',레드:'#e66654'}[outfit.jersey];
     function segment(x1,y1,x2,y2,w,color){
       pixelLine(x1,y1,x2,y2,w+2,ink);
       pixelLine(x1,y1,x2,y2,w,color);
@@ -191,20 +213,24 @@ function makeRenderer(ctx) {
       segment(elbow,y,wrist+side,palm,3,skin);tile(elbow-1,y-1,2,2,light);
     }
     arm(-1);
+    const textured=referenceSheet.complete && referenceSheet.naturalWidth>0;
+    if(!textured){
     for(let row=0;row<20;row++){
       const half=row===0?width-2:row>10?width-1:width;
       tile(-half,shoulder+row,2*half,1,ink);tile(1-half,shoulder+row,2*half-2,1,cloth);
     }
-    tile(-width,hip-1,width*2,7,'#344459');tile(-width,hip-1,width*2,2,santa?'#fff1d8':'#bcc7c2');
+    }
+    tile(-width,hip-1,width*2,7,pony?'#24223c':'#292a30');tile(-width,hip-1,width*2,2,santa?'#fff1d8':'#bcc7c2');
+    if(textured){
+      const view=ctx.canvas===canvas?document.getElementById('camera').value:'front';
+      const index={front:0,side:1,top:2,quarter:3}[view];
+      const bodyWidth=index===1?12:width*2+4;
+      ctx.drawImage(referenceBody(actor,cloth),index*32,0,32,64,-bodyWidth/2,shoulder-11,bodyWidth,hip-shoulder+12);
+    }else{
     tile(-2,shoulder-4,4,5,shade);
     tile(-4,shoulder-11,9,9,ink);tile(-3,shoulder-9,7,6,skin);tile(2,shoulder-8,2,1,light);tile(3,shoulder-7,2,1,ink);
     tile(-4,shoulder-11,8,3,'#51393d');tile(-4,shoulder-9,2,4,'#51393d');
     if(pony){tile(-7,shoulder-9,4,3,cloth);tile(-8,shoulder-7,3,7,'#49313b');}
-    if(back){
-      tile(-4,shoulder-10,9,7,'#4e3329');tile(-3,shoulder-10,5,2,'#81563d');
-    }else{
-      tile(-4,shoulder-10,3,5,'#56372a');tile(-2,shoulder-11,5,2,'#916044');
-      tile(profile?3:1,shoulder-7,1,1,'#fff1dc');
     }
     if(outfit.band!=='없음')tile(-4,shoulder-9,9,2,{화이트:'#fff5de',골드:'#ffcb44',블랙:'#202331'}[outfit.band]);
     if(santa){tile(-4,shoulder-14,7,4,cloth);tile(-5,shoulder-11,10,2,'#fff1d8');tile(-6,shoulder-14,3,3,'#fff1d8');}
@@ -311,15 +337,8 @@ function makeRenderer(ctx) {
     const [height,meters]=playerArt[actor];
     const scale=ballCourtDiameter*height/(16*meters);
     ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
-    if(outfit.skinBall==='오렌지'){
-      ctx.save();ctx.beginPath();ctx.arc(0,0,7.7,0,Math.PI*2);ctx.clip();
-      ctx.fillStyle='#c86022';ctx.fillRect(-8,-8,16,16);
-      ctx.fillStyle='#eb832f';ctx.beginPath();ctx.arc(-2,-2,7,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='#67351e';ctx.lineWidth=.85;
-      for(const [x,y,r] of [[-10,0,10],[10,-3,9],[1,15,15]]){
-        ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.stroke();
-      }
-      ctx.restore();ctx.strokeStyle='#61361f';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(0,0,7.6,0,2*Math.PI);ctx.stroke();
+    if(outfit.skinBall==='오렌지' && referenceSheet.complete && referenceSheet.naturalWidth){
+      ctx.drawImage(referenceSheet,256,0,32,32,-8,-8,16,16);
     }else sprite(-8,-8,['..kkkk..','.khlhlk.','khhlhhlk','kllllllk','kbbblbbk','kbblbblk','.kblblk.','..kkkk..'],{k:ink,l:'#664739',h:'#fff3c3',b:{오렌지:'#ff983b',아이스:'#bceeff',라임:'#d6ff65',클래식:'#c26f37'}[outfit.skinBall]});
     ctx.restore();
   }
@@ -377,7 +396,7 @@ function drawHoop(now,foreground=false) {
   // The endline and both board edges run along the court's x axis.
   const front=1.575-1.365-.10, back=front-.20, half=1.638, low=2.90, high=3.95;
   const frontFace=(w,y,b,t)=>[vertex(-w,y,b),vertex(w,y,b),vertex(w,y,t),vertex(-w,y,t),vertex(-w,y,b)];
-  const edge='#304959';
+  const edge='#56574e';
   if(!foreground){
   shape([vertex(0,-.38,0),vertex(0,-.38,3.45),vertex(0,back,3.45)],edge,4);
   shape([vertex(0,-.38,2.45),vertex(0,back,3.4)],'#608486',2);
