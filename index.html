@@ -29,7 +29,7 @@ const options = document.querySelector('#options');
 const savedLevel = readSetting('difficulty');
 if (Array.from(difficulty.options).some(option => option.value === savedLevel)) difficulty.value = savedLevel;
 soundOn = readSetting('sound') !== 'off';
-const looks = {"costume":["기본","크리스마스 산타"],"actor":["루키","가드","센터","번개"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
+const looks = {"costume":["기본","크리스마스 산타"],"actor":["루키","가드","센터","번개","준 · 남자 7등신","서진 · 여자 7등신"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
 const outfit = {};
 let rewards;
 try { rewards = JSON.parse(readSetting('rewards')) || {}; } catch { rewards = {}; }
@@ -60,7 +60,7 @@ const skinPalettes = {
   golden: {skin:'#d6a366', shade:'#ae7548', light:'#efbf85'},
   deep: {skin:'#815139', shade:'#613b31', light:'#aa7353'}
 };
-const defaultTones = {루키:'light', 가드:'golden', 센터:'deep', 번개:'golden'};
+const defaultTones = {루키:'light', 가드:'golden', 센터:'deep', 번개:'golden','준 · 남자 7등신':'deep','서진 · 여자 7등신':'golden'};
 const playerTones = {};
 const tonePicker = document.getElementById('skinTone');
 for (const actor of looks.actor) {
@@ -134,6 +134,7 @@ function loseGrip(now) {
   tone(180,.1);
 }
 function handPosition(x,ground,pose,actor=outfit.actor) {
+  if(actor.endsWith('7등신')) return {x:x+(x>hoop.x?-1:1)*(15-6*pose.reach),y:ground-pose.jump-37+9*pose.bend-27*pose.reach};
   const height={루키:0,가드:-2,센터:4,번개:8}[actor];
   const face=x>hoop.x?-1:1;
   return {x:x+face*(13-6*pose.reach),y:ground-24-height-(actor==='번개'?3:0)-pose.jump+5*pose.bend-24*pose.reach};
@@ -153,7 +154,48 @@ function makeRenderer(ctx) {
       if(palette[key]) tile(x+dx*2,y+dy*2,2,2,palette[key]);
     }));
   }
+  function drawLongPlayer(x,ground,pose,actor) {
+    const pony=actor.startsWith('서진'), face=x>hoop.x?-1:1;
+    const hand=handPosition(x,ground,pose,actor), wrist=(hand.x-x)*face-2;
+    const palm=hand.y-ground+pose.jump+4;
+    const hip=-31+9*pose.bend, shoulder=hip-19, width=pony?6:7;
+    const {skin,shade,light}=skinPalettes[playerTones[actor]];
+    const santa=outfit.costume==='크리스마스 산타';
+    const cloth=santa?'#c83f49':{블루:'#69b8e7',크림:'#efd293',레드:'#e66654'}[outfit.jersey];
+    function segment(x1,y1,x2,y2,w,color){
+      pixelLine(x1,y1,x2,y2,w+2,ink);
+      pixelLine(x1,y1,x2,y2,w,color);
+    }
+    tile(x-10,ground,21,2,'#143f43');
+    ctx.save();ctx.translate(Math.round(x),Math.round(ground-pose.jump));ctx.scale(face,1);
+    for(const side of [-1,1]){
+      const knee=side*5+6*pose.bend, ankle=side*7;
+      segment(side*3,hip,knee,-16+3*pose.bend,5,side<0?shade:skin);
+      segment(knee,-16+3*pose.bend,ankle,-4,4,skin);
+      tile(ankle-2,-8,4,5,'#ece6d3');tile(ankle-3,-4,9,4,ink);tile(ankle-2,-3,7,2,cloth);
+    }
+    function arm(side){
+      const elbow=side*6+5, y=shoulder+12-17*pose.reach;
+      segment(side*(width-1),shoulder+2,elbow,y,4,side<0?shade:skin);
+      segment(elbow,y,wrist+side,palm,3,skin);tile(elbow-1,y-1,2,2,light);
+    }
+    arm(-1);
+    for(let row=0;row<20;row++){
+      const half=row===0?width-2:row>10?width-1:width;
+      tile(-half,shoulder+row,2*half,1,ink);tile(1-half,shoulder+row,2*half-2,1,cloth);
+    }
+    tile(-width,hip-1,width*2,7,'#344459');tile(-width,hip-1,width*2,2,santa?'#fff1d8':'#bcc7c2');
+    tile(-2,shoulder-4,4,5,shade);
+    tile(-4,shoulder-11,9,9,ink);tile(-3,shoulder-9,7,6,skin);tile(2,shoulder-8,2,1,light);tile(3,shoulder-7,2,1,ink);
+    tile(-4,shoulder-11,8,3,'#51393d');tile(-4,shoulder-9,2,4,'#51393d');
+    if(pony){tile(-7,shoulder-9,4,3,cloth);tile(-8,shoulder-7,3,7,'#49313b');}
+    if(outfit.band!=='없음')tile(-4,shoulder-9,9,2,{화이트:'#fff5de',골드:'#ffcb44',블랙:'#202331'}[outfit.band]);
+    if(santa){tile(-4,shoulder-14,7,4,cloth);tile(-5,shoulder-11,10,2,'#fff1d8');tile(-6,shoulder-14,3,3,'#fff1d8');}
+    ctx.save();ctx.scale(face,1);ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillStyle=ink;ctx.fillText(numberInput.value,0,shoulder+12);ctx.restore();
+    arm(1);ctx.restore();return hand;
+  }
   function drawPlayer(x,ground,pose,actor=outfit.actor) {
+    if(actor.endsWith("7등신")) return drawLongPlayer(x,ground,pose,actor);
     const face=x>hoop.x?-1:1;
     const tall={루키:0,가드:-2,센터:4,번개:8}[actor];
     const wide={루키:8,가드:7,센터:10,번개:9}[actor];
@@ -285,13 +327,29 @@ refreshPortraits();
 numberInput.addEventListener('input',refreshPortraits);
 document.querySelector('#appearance').addEventListener('change',refreshPortraits);
 function drawHoop() {
-  tile(169,66,62,37,ink); tile(172,69,56,31,'#b4ebdf');tile(175,71,50,27,'#eaf7ed');
-  tile(188,80,24,18,'#5b93a2');tile(191,83,18,12,'#d9f3eb');
-  for(let i=-12;i<=12;i+=6) {
-    pixelLine(200+i,106,200+i*.55+2,121,2,'#ffefd0');
-    pixelLine(200+i,106,200+i*.55-2,121,1,'#acd0cc');
+  const lift=cameras[camera.value].lift;
+  function vertex(x,depth,z){
+    const p=projectCourt(x,depth);
+    return [p.x,p.y-z*lift/3.05];
   }
-  tile(185,101,30,7,ink);tile(187,102,26,4,'#ff913e');tile(190,103,20,1,ink);
+  function shape(points,color,weight,fill){
+    ctx.beginPath();
+    points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+    if(fill){ctx.closePath();ctx.fillStyle=fill;ctx.fill();}
+    ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.stroke();
+  }
+  function board(w,bottom,top,color,fill){
+    shape([vertex(-w,1.2,bottom),vertex(w,1.2,bottom),vertex(w,1.2,top),vertex(-w,1.2,top),vertex(-w,1.2,bottom)],color,2,fill);
+  }
+  board(.91,2.9,3.95,'#304959','#c5e3db');
+  board(.32,3.05,3.55,'#588391');
+  function ring(t,z,r){return vertex(r*Math.cos(t),1.575+r*Math.sin(t),z);}
+  for(let i=0;i<10;i++){
+    const t=i*Math.PI/5;
+    shape([ring(t,3.05,.26),ring(t+.28,2.63,.17),ring(t+.62,3.05,.26)],'#f6ebcf',1.2);
+  }
+  const rim=Array.from({length:25},(_,i)=>ring(i*Math.PI/12,3.05,.26));
+  shape(rim,'#493334',4);shape(rim,'#ff8939',2);
 }
 const tiers = [
   {width:.45, shift:.06}, {width:.30, shift:.09}, {width:.18, shift:.12},
@@ -624,7 +682,7 @@ if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.heigh
 paintCourt();
 const rim=floorPoint(hoop.x,hoop.y), lift=cameras[camera.value].lift;
 rim.y-=lift;
-atPoint(rim,hoop.x,hoop.y,drawHoop);
+drawHoop();
 if(phase==='hold' && holdExpired(session,band.tier,now-start)) loseGrip(now);
 if(phase==='fumble' && now-start>=holdRecoveryMs){phase='ready';difficulty.disabled=false;prepareNextShot(false);statusLine.textContent='다시 준비 · 목표 띠에서 놓으세요';}
 let elapsed=Math.max(0,now-start),power=phase==='hold'?gaugePower(session,band.tier,elapsed):0;
