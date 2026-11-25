@@ -4,6 +4,7 @@
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
+<label>선수 피부톤 <select id="skinTone"><option value="light">밝은 톤</option><option value="golden">따뜻한 중간 톤</option><option value="deep">짙은 톤</option></select></label>
 <label>코스튬 <select id="costume"><option>기본</option><option>크리스마스 산타</option></select></label>
 <label>유니폼 <select id="jersey"><option>크림</option><option>블루</option><option>레드</option></select></label>
 <label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option><option value="골드" disabled>골드 헤어밴드 · 3연속</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script>
@@ -54,9 +55,26 @@ function awardGoal(streak, notices) {
 }
 refreshRewards();
 const numberInput = document.querySelector('#jerseyNumber');
+const skinPalettes = {
+  light: {skin:'#f6d5bf', shade:'#e8bfa8'},
+  golden: {skin:'#d6a366', shade:'#c7965e'},
+  deep: {skin:'#815139', shade:'#714632'}
+};
+const defaultTones = {루키:'light', 가드:'golden', 센터:'deep', 번개:'golden'};
+const playerTones = {};
+const tonePicker = document.getElementById('skinTone');
+for (const actor of looks.actor) {
+  const saved = readSetting('skin-tone-' + actor);
+  playerTones[actor] = Object.hasOwn(skinPalettes,saved) ? saved : defaultTones[actor];
+}
+tonePicker.onchange = () => {
+  playerTones[outfit.actor] = tonePicker.value;
+  saveSetting('skin-tone-' + outfit.actor,tonePicker.value);
+};
 function applyLook(key, value) {
   const selected = looks[key].includes(value) && !(value === '클래식' && totalGoals < 5) && !(value === '골드' && !goldBand) ? value : looks[key][0];
   outfit[key] = selected;
+  if (key === 'actor') tonePicker.value = playerTones[selected];
   document.getElementById(key).value = selected;
   document.querySelector('#homePlayer').textContent = '선수 · ' + outfit.actor;
   canvas.style.backgroundColor = {그린:'#216563', 야간:'#213451', 우드:'#835838'}[outfit.floor] || '#216563';
@@ -141,7 +159,7 @@ function makeRenderer(ctx) {
     const wide={루키:8,가드:7,센터:10,번개:9}[actor];
     const hip=(actor==='번개'?-19:-16)+5*pose.bend;
     const shoulder=hip-12-tall;
-    const skin='#f8b875', shade='#c57952';
+    const {skin,shade} = skinPalettes[playerTones[actor]];
     const santa = outfit.costume === '크리스마스 산타';
     const shirt=santa ? '#d53a42' : {크림:'#ffe3a2',블루:'#79caff',레드:'#ff765e'}[outfit.jersey];
     const hand=handPosition(x,ground,pose,actor);
@@ -156,7 +174,7 @@ function makeRenderer(ctx) {
     }
     for(const side of [-1,1]) {
       const foot=side*6;
-      limb(side*4,hip,foot+2+5*pose.bend,-8+pose.bend,foot,-3,side<0?shade:skin);
+      limb(side*4,hip,foot+2+5*pose.bend,-8+pose.bend,foot,-3,skin);
       tile(foot-3,-4,10,5,ink);tile(foot-2,-4,7,3,'#fff3d2');
     }
     tile(-wide,shoulder,wide*2,hip-shoulder+3,ink);
@@ -174,7 +192,8 @@ function makeRenderer(ctx) {
     }
     // The neck bridges the chin and jersey in every crouch and jump frame.
     tile(-4,shoulder-5,9,8,ink);
-    tile(-2,shoulder-5,6,8,shade);
+    tile(-2,shoulder-5,6,8,skin);
+    tile(-2,shoulder-4,2,3,shade);
     if (actor === '번개') {
       sprite(-11,shoulder-17,[
         '..kk..kkk..','..khkkhhkk.','.khhhhhhhhk',
@@ -195,7 +214,7 @@ function makeRenderer(ctx) {
     if(outfit.band!=='없음') tile(-7,shoulder-13,14,3,outfit.band==='화이트'?'#fff5de':outfit.band==='골드'?'#ffcb44':'#202331');
     ctx.save();ctx.scale(face,1);ctx.fillStyle=santa?'#fff1d8':ink;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(numberInput.value,0,shoulder+10);ctx.restore();
     const wristX=(hand.x-x)*face-2, wristY=hand.y-ground+pose.jump+5;
-    limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,shade);
+    limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,skin);
     limb(wide-2,shoulder+4,wide+5,shoulder+12-21*pose.reach,wristX,wristY,skin);
     pixelLine(wristX,wristY,wristX+4,wristY-2+4*pose.reach,3,skin);
     ctx.restore();
