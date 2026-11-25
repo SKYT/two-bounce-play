@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드</title><style>
 *{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:520px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:32px;margin:0}canvas{image-rendering:pixelated;width:100%;height:min(62dvh,540px);display:block;background:#216563;border-radius:16px;margin:14px 0;touch-action:none}button,select{font:inherit;border:0;border-radius:10px;padding:10px;background:#fff4d3;color:#142d2e}#shoot{width:100%;touch-action:none;user-select:none;background:#ffc158;font-weight:800;font-size:20px;padding:14px}footer{margin-top:12px}p{min-height:1.5em;margin:8px 0}
-[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
+[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
@@ -28,7 +28,7 @@ const options = document.querySelector('#options');
 const savedLevel = readSetting('difficulty');
 if (Array.from(difficulty.options).some(option => option.value === savedLevel)) difficulty.value = savedLevel;
 soundOn = readSetting('sound') !== 'off';
-const looks = {"costume":["기본","크리스마스 산타"],"actor":["루키","가드","센터"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
+const looks = {"costume":["기본","크리스마스 산타"],"actor":["루키","가드","센터","번개"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
 const outfit = {};
 let rewards;
 try { rewards = JSON.parse(readSetting('rewards')) || {}; } catch { rewards = {}; }
@@ -116,9 +116,9 @@ function loseGrip(now) {
   tone(180,.1);
 }
 function handPosition(x,ground,pose,actor=outfit.actor) {
-  const height={루키:0,가드:-2,센터:4}[actor];
+  const height={루키:0,가드:-2,센터:4,번개:8}[actor];
   const face=x>hoop.x?-1:1;
-  return {x:x+face*(13-6*pose.reach),y:ground-24-height-pose.jump+5*pose.bend-24*pose.reach};
+  return {x:x+face*(13-6*pose.reach),y:ground-24-height-(actor==='번개'?3:0)-pose.jump+5*pose.bend-24*pose.reach};
 }
 function makeRenderer(ctx) {
   function tile(x,y,w,h,color) {
@@ -137,9 +137,9 @@ function makeRenderer(ctx) {
   }
   function drawPlayer(x,ground,pose,actor=outfit.actor) {
     const face=x>hoop.x?-1:1;
-    const tall={루키:0,가드:-2,센터:4}[actor];
-    const wide={루키:8,가드:7,센터:10}[actor];
-    const hip=-15+5*pose.bend;
+    const tall={루키:0,가드:-2,센터:4,번개:8}[actor];
+    const wide={루키:8,가드:7,센터:10,번개:9}[actor];
+    const hip=(actor==='번개'?-19:-16)+5*pose.bend;
     const shoulder=hip-12-tall;
     const skin='#f8b875', shade='#c57952';
     const santa = outfit.costume === '크리스마스 산타';
@@ -150,7 +150,7 @@ function makeRenderer(ctx) {
     ctx.translate(Math.round(x),Math.round(ground-pose.jump));
     ctx.scale(face,1);
     function limb(ax,ay,bx,by,cx,cy,color) {
-      for(const [size,tint] of [[7,ink],[4,color]]) {
+      for(const [size,tint] of [[9,ink],[6,color]]) {
         pixelLine(ax,ay,bx,by,size,tint); pixelLine(bx,by,cx,cy,size,tint);
       }
     }
@@ -161,13 +161,27 @@ function makeRenderer(ctx) {
     }
     tile(-wide,shoulder,wide*2,hip-shoulder+3,ink);
     tile(2-wide,shoulder+2,wide*2-4,hip-shoulder-2,shirt);
-    tile(-wide,hip-2,wide*2,6,'#34445a');
+    tile(-wide,hip-2,wide*2,7,'#34445a');
+    if (actor === '번개' && !santa) {
+      tile(2-wide,shoulder+2,4,5,'#248c91');
+      tile(4-wide,shoulder+7,3,3,'#248c91');
+      tile(6-wide,shoulder+10,2,2,'#248c91');
+    }
     if (santa) {
       tile(2-wide,hip-4,wide*2-4,3,'#fff1d8');
       tile(-wide,hip-1,wide*2,3,ink);
       tile(-2,hip-1,4,3,'#ffd365');
     }
-    sprite(-9,shoulder-19,['..kkkkk..','.khhhhkk.','khhhhkhhk','khssssssk','.kssksksk','.ksssssks','..kssssk.','...kkkk..'],{k:ink,h:'#704638',s:skin});
+    // The neck bridges the chin and jersey in every crouch and jump frame.
+    tile(-4,shoulder-5,9,8,ink);
+    tile(-2,shoulder-5,6,8,shade);
+    if (actor === '번개') {
+      sprite(-11,shoulder-17,[
+        '..kk..kkk..','..khkkhhkk.','.khhhhhhhhk',
+        'khhhtthhhhk','khhsskksssk','.ksssksskek',
+        '.ksssssnnsk','..ksssssksk','...kkssskk.','.....kkk...'
+      ],{k:ink,h:'#352f51',t:'#69d6ca',s:skin,n:shade,e:'#fff3d2'});
+    } else sprite(-9,shoulder-17,['..kkkkk..','.khhhhkk.','khhhhkhhk','khssssssk','.kssksksk','.ksssssks','..kssssk.','...kkkk..'],{k:ink,h:'#704638',s:skin});
     if (santa) {
       sprite(-15,shoulder-27,[
         '....rrrrr...',
@@ -199,7 +213,7 @@ const portraits = looks.actor.map(actor => {
   card.type = 'button';
   const portrait = document.createElement('canvas');
   portrait.width = 68;
-  portrait.height = 72;
+  portrait.height = 80;
   portrait.setAttribute('aria-hidden','true');
   card.append(portrait,document.createTextNode(actor));
   roster.append(card);
@@ -216,7 +230,7 @@ function refreshPortraits() {
     card.setAttribute('aria-pressed',String(actor === outfit.actor));
     portrait.style.backgroundColor = canvas.style.backgroundColor;
     portrait.getContext('2d').clearRect(0,0,portrait.width,portrait.height);
-    const hand = renderer.drawPlayer(29,65,{reach:.22,bend:.25,jump:0},actor);
+    const hand = renderer.drawPlayer(29,73,{reach:.22,bend:.25,jump:0},actor);
     renderer.drawBall(hand.x,hand.y);
   }
 }
