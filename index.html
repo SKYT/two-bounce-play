@@ -169,9 +169,10 @@ function makeRenderer(ctx) {
     ctx.translate(Math.round(x),Math.round(ground-pose.jump));
     ctx.scale(face,1);
     function limb(ax,ay,bx,by,cx,cy,color) {
-      for(const [size,tint] of [[9,ink],[7,shade],[5,color]]) {
+      for(const [size,tint] of [[8,ink],[6,shade],[4,color]]) {
         pixelLine(ax,ay,bx,by,size,tint); pixelLine(bx,by,cx,cy,size,tint);
       }
+      pixelLine(ax-1,ay-1,(ax+bx)/2-1,(ay+by)/2-1,2,light);
       tile(bx-2,by-2,3,2,light);
     }
     for(const side of [-1,1]) {
@@ -179,14 +180,26 @@ function makeRenderer(ctx) {
       limb(side*4,hip,foot+2+5*pose.bend,-8+pose.bend,foot,-3,skin);
       tile(foot-3,-4,10,5,ink);tile(foot-2,-5,4,2,'#d5d8cc');tile(foot-2,-3,7,3,shirt);tile(foot,-3,3,1,'#fff3d2');tile(foot-2,0,8,1,'#c5bcae');
     }
-    tile(-wide,shoulder,wide*2,hip-shoulder+3,ink);
-    tile(2-wide,shoulder+2,wide*2-4,hip-shoulder-2,shirt);
-    tile(-wide,hip-2,wide*2,7,'#34445a');
-    tile(2-wide,shoulder+4,3,hip-shoulder-6,trim);
-    tile(wide-5,hip-6,3,4,trim);
-    tile(wide-6,shoulder+2,4,2,'#fff2cd');
-    tile(-wide+1,hip,wide*2-2,2,'#536681');
-    tile(-wide+2,hip+2,2,3,shirt);
+    const wristX=(hand.x-x)*face-2, wristY=hand.y-ground+pose.jump+5;
+    limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,skin);
+    // Step the silhouette inward from the shoulders to the waist.
+    for(let row=0;row<hip-shoulder;row++){
+      const half=wide-(row===0?3:row<3?1:row>hip-shoulder-5?2:0);
+      tile(-half,shoulder+row,half*2,1,ink);
+      tile(1-half,shoulder+row,half*2-2,1,shirt);
+      tile(1-half,shoulder+row,row<4?2:3,1,trim);
+    }
+    tile(-wide+3,shoulder+2,3,2,'#fff2cd');
+    tile(wide-5,shoulder+3,2,4,trim);
+    tile(-wide+4,hip-5,4,2,trim);
+    tile(-wide+7,hip-6,3,1,trim);
+    tile(2-wide,hip-1,wide*2-4,2,ink);
+    for(const side of [-1,1]){
+      const left=side<0?-wide:0;
+      tile(left,hip+1,wide,5,ink);
+      tile(left+1,hip+1,wide-2,4,side<0?'#38435c':'#536681');
+      tile(left+1,hip+1,2,3,trim);
+    }
     if (actor === '번개' && !santa) {
       tile(2-wide,shoulder+2,4,5,'#248c91');
       tile(4-wide,shoulder+7,3,3,'#248c91');
@@ -207,7 +220,17 @@ function makeRenderer(ctx) {
         'khhhtthhhhk','khhsskkllsk','.ksssksskek',
         '.ksssssnnsk','..ksssssksk','...kkssskk.','.....kkk...'
       ],{k:ink,h:'#352f51',t:'#69d6ca',s:skin,l:light,n:shade,e:'#fff3d2'});
-    } else sprite(-9,shoulder-17,['..kkkkk..','.khhaakk.','khhhhkhhk','khnsllssk','.knskskek','.knssslks','..knnssk.','...kkkk..'],{k:ink,h:'#704638',a:'#a46b4d',s:skin,n:shade,l:light,e:'#fff2d7'});
+    } else {
+      const crowns={
+        루키:['...kkkkkk..','..khaaahhk.','.khhahhhhhh','khhhhkkhhhk'],
+        가드:['.....kk..k.','...kkahkkhk','.kkahhahhhk','khhhhhhkkhk'],
+        센터:['..kkkkkkk..','.kaaaaahhk.','.khhhhhhhh.','.khhkkkkhhk']
+      };
+      sprite(-11,shoulder-20,[...crowns[actor],
+        '.khhnssllsk','.khnsnkkskk','.knsnsssekk','..knssllssk',
+        '..knnssskk.','...knnsssk.','....kkkkk..'
+      ],{k:ink,h:actor==='센터'?'#443832':'#553746',a:actor==='가드'?'#ad6651':'#896049',s:skin,n:shade,l:light,e:'#fff4df'});
+    }
     if (santa) {
       sprite(-15,shoulder-27,[
         '....rrrrr...',
@@ -220,8 +243,6 @@ function makeRenderer(ctx) {
     }
     if(outfit.band!=='없음') tile(-7,shoulder-13,14,3,outfit.band==='화이트'?'#fff5de':outfit.band==='골드'?'#ffcb44':'#202331');
     ctx.save();ctx.scale(face,1);ctx.fillStyle=santa?'#fff1d8':ink;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(numberInput.value,0,shoulder+10);ctx.restore();
-    const wristX=(hand.x-x)*face-2, wristY=hand.y-ground+pose.jump+5;
-    limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,skin);
     limb(wide-2,shoulder+4,wide+5,shoulder+12-21*pose.reach,wristX,wristY,skin);
     pixelLine(wristX,wristY,wristX+4,wristY-2+4*pose.reach,3,skin);
     ctx.restore();
