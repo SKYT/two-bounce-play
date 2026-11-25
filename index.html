@@ -4,6 +4,7 @@
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
+<label>코스튬 <select id="costume"><option>기본</option><option>크리스마스 산타</option></select></label>
 <label>유니폼 <select id="jersey"><option>크림</option><option>블루</option><option>레드</option></select></label>
 <label>헤어밴드 <select id="band"><option>없음</option><option>화이트</option><option>블랙</option><option value="골드" disabled>골드 헤어밴드 · 3연속</option></select></label><label>등번호 <input id="jerseyNumber" inputmode="numeric" maxlength="2" size="2"></label></fieldset><button id="back">홈으로</button></section></main><script>
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),button=document.querySelector('#shoot'),statusLine=document.querySelector('#status');
@@ -27,7 +28,7 @@ const options = document.querySelector('#options');
 const savedLevel = readSetting('difficulty');
 if (Array.from(difficulty.options).some(option => option.value === savedLevel)) difficulty.value = savedLevel;
 soundOn = readSetting('sound') !== 'off';
-const looks = {"actor":["루키","가드","센터"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
+const looks = {"costume":["기본","크리스마스 산타"],"actor":["루키","가드","센터"],"floor":["그린","야간","우드"],"skinBall":["오렌지","아이스","라임","클래식"],"jersey":["크림","블루","레드"],"band":["없음","화이트","블랙","골드"]};
 const outfit = {};
 let rewards;
 try { rewards = JSON.parse(readSetting('rewards')) || {}; } catch { rewards = {}; }
@@ -141,7 +142,8 @@ function makeRenderer(ctx) {
     const hip=-15+5*pose.bend;
     const shoulder=hip-12-tall;
     const skin='#f8b875', shade='#c57952';
-    const shirt={크림:'#ffe3a2',블루:'#79caff',레드:'#ff765e'}[outfit.jersey];
+    const santa = outfit.costume === '크리스마스 산타';
+    const shirt=santa ? '#d53a42' : {크림:'#ffe3a2',블루:'#79caff',레드:'#ff765e'}[outfit.jersey];
     const hand=handPosition(x,ground,pose,actor);
     tile(x-12,ground-1,24,3,'#143f43');
     ctx.save();
@@ -160,9 +162,24 @@ function makeRenderer(ctx) {
     tile(-wide,shoulder,wide*2,hip-shoulder+3,ink);
     tile(2-wide,shoulder+2,wide*2-4,hip-shoulder-2,shirt);
     tile(-wide,hip-2,wide*2,6,'#34445a');
+    if (santa) {
+      tile(2-wide,hip-4,wide*2-4,3,'#fff1d8');
+      tile(-wide,hip-1,wide*2,3,ink);
+      tile(-2,hip-1,4,3,'#ffd365');
+    }
     sprite(-9,shoulder-19,['..kkkkk..','.khhhhkk.','khhhhkhhk','khssssssk','.kssksksk','.ksssssks','..kssssk.','...kkkk..'],{k:ink,h:'#704638',s:skin});
+    if (santa) {
+      sprite(-15,shoulder-27,[
+        '....rrrrr...',
+        '..rrrssrrr..',
+        '.rrr.rrrrrr.',
+        '.ww..rrrrrrr',
+        'www.wwwwwwww',
+        '.w..wwwwwwww'
+      ],{r:'#d53a42',s:'#9d2638',w:'#fff1d8'});
+    }
     if(outfit.band!=='없음') tile(-7,shoulder-13,14,3,outfit.band==='화이트'?'#fff5de':outfit.band==='골드'?'#ffcb44':'#202331');
-    ctx.save();ctx.scale(face,1);ctx.fillStyle=ink;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(numberInput.value,0,shoulder+10);ctx.restore();
+    ctx.save();ctx.scale(face,1);ctx.fillStyle=santa?'#fff1d8':ink;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(numberInput.value,0,shoulder+10);ctx.restore();
     const wristX=(hand.x-x)*face-2, wristY=hand.y-ground+pose.jump+5;
     limb(-wide+1,shoulder+3,1,shoulder+11-17*pose.reach,wristX-3,wristY+1,shade);
     limb(wide-2,shoulder+4,wide+5,shoulder+12-21*pose.reach,wristX,wristY,skin);
@@ -182,7 +199,7 @@ const portraits = looks.actor.map(actor => {
   card.type = 'button';
   const portrait = document.createElement('canvas');
   portrait.width = 68;
-  portrait.height = 64;
+  portrait.height = 72;
   portrait.setAttribute('aria-hidden','true');
   card.append(portrait,document.createTextNode(actor));
   roster.append(card);
@@ -199,7 +216,7 @@ function refreshPortraits() {
     card.setAttribute('aria-pressed',String(actor === outfit.actor));
     portrait.style.backgroundColor = canvas.style.backgroundColor;
     portrait.getContext('2d').clearRect(0,0,portrait.width,portrait.height);
-    const hand = renderer.drawPlayer(29,57,{reach:.22,bend:.25,jump:0},actor);
+    const hand = renderer.drawPlayer(29,65,{reach:.22,bend:.25,jump:0},actor);
     renderer.drawBall(hand.x,hand.y);
   }
 }
