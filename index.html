@@ -338,11 +338,22 @@ function drawHoop() {
     if(fill){ctx.closePath();ctx.fillStyle=fill;ctx.fill();}
     ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.stroke();
   }
-  function board(w,bottom,top,color,fill){
-    shape([vertex(-w,1.2,bottom),vertex(w,1.2,bottom),vertex(w,1.2,top),vertex(-w,1.2,top),vertex(-w,1.2,bottom)],color,2,fill);
+  // The endline and both board edges run along the court's x axis.
+  const front=1.20, back=1.08, half=.91, low=2.90, high=3.95;
+  const frontFace=(w,y,b,t)=>[vertex(-w,y,b),vertex(w,y,b),vertex(w,y,t),vertex(-w,y,t),vertex(-w,y,b)];
+  const edge='#304959';
+  shape([vertex(0,-.38,0),vertex(0,-.38,3.45),vertex(0,back,3.45)],edge,4);
+  shape([vertex(0,-.38,2.45),vertex(0,back,3.4)],'#608486',2);
+  const cosine=Math.cos(cameras[camera.value].angle);
+  if(cosine>.001){
+    shape(frontFace(half,front,low,high),edge,1.5,'#c5e3db');
+    shape(frontFace(.32,front,3.05,3.55),'#588391',1.5);
   }
-  board(.91,2.9,3.95,'#304959','#c5e3db');
-  board(.32,3.05,3.55,'#588391');
+  shape([vertex(-half,back,high),vertex(half,back,high),vertex(half,front,high),vertex(-half,front,high)],edge,1,'#e2f1e7');
+  if(Math.abs(Math.sin(cameras[camera.value].angle))>.001){
+    shape([vertex(-half,back,low),vertex(-half,front,low),vertex(-half,front,high),vertex(-half,back,high)],edge,1,'#759698');
+  }
+  shape([vertex(0,front,3.05),vertex(0,1.575-.26,3.05)],'#af562f',3);
   function ring(t,z,r){return vertex(r*Math.cos(t),1.575+r*Math.sin(t),z);}
   for(let i=0;i<10;i++){
     const t=i*Math.PI/5;
