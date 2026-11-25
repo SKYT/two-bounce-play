@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드</title><style>
 *{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:520px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:32px;margin:0}canvas{image-rendering:pixelated;width:100%;height:min(62dvh,540px);display:block;background:#216563;border-radius:16px;margin:14px 0;touch-action:none}button,select{font:inherit;border:0;border-radius:10px;padding:10px;background:#fff4d3;color:#142d2e}#shoot{width:100%;touch-action:none;user-select:none;background:#ffc158;font-weight:800;font-size:20px;padding:14px}footer{margin-top:12px}p{min-height:1.5em;margin:8px 0}
-[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v16 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
+[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v17 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
@@ -343,7 +343,7 @@ function currentRimRadius(){
   const formerWidth={'루키':22,'가드':22,'센터':22,'번개':22,'준 · 남자 7등신':13,'서진 · 여자 7등신':14}[outfit.actor];
   return .8*1.05*formerWidth*meters/height;
 }
-function drawHoop(now) {
+function drawHoop(now,foreground=false) {
   const rimRadius=currentRimRadius();
   const lift=rimHeightPixels();
   function vertex(x,depth,z){
@@ -360,6 +360,7 @@ function drawHoop(now) {
   const front=1.575-1.365-.10, back=front-.20, half=1.638, low=2.90, high=3.95;
   const frontFace=(w,y,b,t)=>[vertex(-w,y,b),vertex(w,y,b),vertex(w,y,t),vertex(-w,y,t),vertex(-w,y,b)];
   const edge='#304959';
+  if(!foreground){
   shape([vertex(0,-.38,0),vertex(0,-.38,3.45),vertex(0,back,3.45)],edge,4);
   shape([vertex(0,-.38,2.45),vertex(0,back,3.4)],'#608486',2);
   const cosine=Math.cos(cameras[camera.value].angle);
@@ -372,6 +373,7 @@ function drawHoop(now) {
     shape([vertex(-half,back,low),vertex(-half,front,low),vertex(-half,front,high),vertex(-half,back,high)],edge,1,'#759698');
   }
   shape([vertex(0,front,3.05),vertex(0,1.575-rimRadius,3.05)],'#af562f',3);
+  }
   function ring(t,z,r){return vertex(r*Math.cos(t),1.575+r*Math.sin(t),z);}
   // Anchor the lowest net knot in screen space so camera tilt cannot shorten it.
   const netSteps=10;
@@ -387,6 +389,7 @@ function drawHoop(now) {
   const cos=Math.cos(bend),sin=Math.sin(bend);
   for(let i=0;i<netSteps;i++){
     const angle=i*2*Math.PI/netSteps;
+    if(foreground && Math.sin(angle+Math.PI/netSteps+cameras[camera.value].angle)<1e-9)continue;
     const left=ring(angle,3.05,rimRadius),right=ring(angle+2*Math.PI/netSteps,3.05,rimRadius);
     const [x,y]=knots[i],bottom=y+netDrop;
     const midLeft=[(left[0]+x)/2,(left[1]+bottom)/2];
@@ -396,7 +399,7 @@ function drawHoop(now) {
     const tip=[pivotX+dx*cos+dy*sin,pivotY-dx*sin+dy*cos];
     shape([left,midLeft,tip,midRight,right],'#f6ebcf',1.2);
   }
-  const rim=Array.from({length:25},(_,i)=>ring(i*Math.PI/12,3.05,rimRadius));
+  const rim=Array.from({length:foreground?13:25},(_,i)=>ring(i*Math.PI/12-(foreground?cameras[camera.value].angle:0),3.05,rimRadius));
   const stroke=courtScale(cameras[camera.value].angle)*.085;
   shape(rim,'#493334',stroke+1);shape(rim,'#ff8939',stroke);
 }
@@ -732,17 +735,18 @@ function madeBasketPosition(t,end,rim,lift,scale) {
   const radius=ballCourtDiameter*scale/2;
   const floor=floorPoint(hoop.x,hoop.y);
   // Overhead projection collapses height. Keep the illustrated drop legible.
-  const impact={x:floor.x,y:Math.max(rim.y+lift-radius,netExit.y+radius*.65)};
+  const impact={x:floor.x,y:Math.max(rim.y+lift-radius,netExit.y+radius*2.4)};
   if(t<=.24) return {x:rim.x,y:lerp(rim.y,netExit.y,t/.24)};
   if(t<=.56) {
     const u=(t-.24)/.32;
     return {x:impact.x,y:lerp(netExit.y,impact.y,u*(.45+.55*u))};
   }
   const u=(t-.56)/.44, landing=floorPoint(end.x,end.y);
-  return {x:lerp(impact.x,landing.x,u),y:lerp(impact.y,landing.y-radius,u)-4*u*(1-u)*scale*.85};
+  return {x:lerp(impact.x,landing.x,u),y:lerp(impact.y,landing.y-radius,u)-4*u*(1-u)*scale*1.75};
 }
 function frame(now){
-const finishedBounce = phase === 'bounce' && now-start >= 890;
+const bounceDuration=shot?.hit?1420:890;
+const finishedBounce = phase === 'bounce' && now-start >= bounceDuration;
 const finishedFumble = phase === 'fumble' && now-start >= holdRecoveryMs;
 if (misses >= missLimit && (finishedBounce || finishedFumble)) {
   if (finishedBounce) { tone(125,.12); vibrate(10); }
@@ -757,9 +761,9 @@ if(phase==='hold' && holdExpired(session,band.tier,now-start)) loseGrip(now);
 if(phase==='fumble' && now-start>=holdRecoveryMs){phase='ready';difficulty.disabled=false;prepareNextShot(false);statusLine.textContent='다시 준비 · 목표 띠에서 놓으세요';}
 let elapsed=Math.max(0,now-start),power=phase==='hold'?gaugePower(session,band.tier,elapsed):0;
 if(phase==='flight'){let t=Math.min(1,Math.max(0,elapsed-ballReleaseMs)/(620-ballReleaseMs));ball={x:lerp(shot.origin.x,shot.contact,t),y:lerp(shot.origin.y,105,t)-95*Math.sin(Math.PI*t)};if(t===1){phase='bounce';start=now;if(shot.hit){scored++;goalAt=now;vibrate([30,45,30])}recordShot(shot.hit);score.textContent=scored+' / '+attempts+' 슛';if(shot.perfect)swish();else tone(shot.hit?740:310,.13);statusLine.textContent=shot.perfect?'PERFECT · 다음 바운드를 보세요':shot.hit?'득점 · 다음 바운드를 보세요':'림 · 다음 바운드를 보세요'}}
-if(phase==='bounce'){const t=Math.min(1,(now-start)/890),first=.56,u=t<first?t/first:(t-first)/(1-first);ball={x:lerp(shot.contact,shot.end.x,t),y:lerp(105,shot.end.y,t)-(t<first?32*(1-u)+42*Math.sin(Math.PI*u):34*Math.sin(Math.PI*u))};if(t>=first&&sequence===0){tone(155,.13);vibrate(10);sequence=1}if(t===1){tone(125,.12);vibrate(10);difficulty.disabled=false;player=nextSpot(shot.end);prepareNextShot(false);phase='ready';statusLine.textContent=outside(shot.end)?'범위 이탈 · 자유투 라인에서 다시 시작':'두 번째 바운드 · 이 자리에서 다음 슛'}}
+if(phase==='bounce'){const t=Math.min(1,(now-start)/bounceDuration),first=.56,u=t<first?t/first:(t-first)/(1-first);ball={x:lerp(shot.contact,shot.end.x,t),y:lerp(105,shot.end.y,t)-(t<first?32*(1-u)+42*Math.sin(Math.PI*u):34*Math.sin(Math.PI*u))};if(t>=first&&sequence===0){tone(155,.13);vibrate(10);sequence=1}if(t===1){tone(125,.12);vibrate(10);difficulty.disabled=false;player=nextSpot(shot.end);prepareNextShot(false);phase='ready';statusLine.textContent=outside(shot.end)?'범위 이탈 · 자유투 라인에서 다시 시작':'두 번째 바운드 · 이 자리에서 다음 슛'}}
 drawHoop(now);
-let px=player.x,py=player.y;if(phase==='bounce'){const t=Math.min(1,(now-start)/890);px=lerp(px,shot.end.x,t);py=lerp(py,shot.end.y,t)}
+let px=player.x,py=player.y;if(phase==='bounce'){const t=Math.min(1,(now-start)/bounceDuration);px=lerp(px,shot.end.x,t);py=lerp(py,shot.end.y,t)}
 const pose=poseAt(phase,elapsed);const feet=floorPoint(px,py);
 const flip=(px>hoop.x?-1:1)*(feet.x>rim.x?-1:1);
 const pixelsPerMeter=courtScale(cameras[camera.value].angle);
@@ -779,24 +783,25 @@ if(phase==='flight' && elapsed>=ballReleaseMs){
   const origin=floorPoint(shot.from.x,shot.from.y), target=floorPoint(shot.contact,hoop.y);
   shown={x:lerp(origin.x+(shot.origin.x-shot.from.x)*flip*actorScale,target.x,t),y:lerp(origin.y+(shot.origin.y-shot.from.y)*actorScale,target.y-lift,t)-95*Math.sin(Math.PI*t)};
 }else if(phase==='bounce'){
-  const t=Math.min(1,(now-start)/890), u=t<.56?t/.56:(t-.56)/.44;
+  const t=Math.min(1,(now-start)/bounceDuration), u=t<.56?t/.56:(t-.56)/.44;
   if(shot.hit) shown=madeBasketPosition(t,shot.end,rim,lift,pixelsPerMeter);
   else {
     shown=floorPoint(ball.x,lerp(hoop.y,shot.end.y,t));
     shown.y-=(t<.56?lift*(1-u)+42*Math.sin(Math.PI*u):34*Math.sin(Math.PI*u));
   }
 }
-atPoint(shown,0,0,()=>drawBall(0,0),1,actorScale);
-if(phase==='bounce' && shot.hit && now-start<.24*890){
-  // Draw the near lip over the ball while it crosses the ring.
-  const radius=currentRimRadius();
-  ctx.beginPath();
-  for(let i=0;i<=16;i++){
-    const a=i*Math.PI/16-cameras[camera.value].angle;
-    const p=projectCourt(radius*Math.cos(a),1.575+radius*Math.sin(a));
-    if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);
+if(phase==='bounce' && shot.hit){
+  const t=(now-start)/bounceDuration;
+  if(t>=.56 && t<.76 && !reducedMotion.matches){
+    const impact=madeBasketPosition(.56,shot.end,rim,lift,pixelsPerMeter);
+    const u=(t-.56)/.20;
+    ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='#fff0c4';ctx.lineWidth=2;
+    ctx.beginPath();ctx.ellipse(impact.x,impact.y+ballCourtDiameter*pixelsPerMeter/2,(.22+u*.7)*pixelsPerMeter,(.08+u*.18)*pixelsPerMeter,0,0,2*Math.PI);ctx.stroke();ctx.restore();
   }
-  ctx.strokeStyle='#ff8939';ctx.lineWidth=pixelsPerMeter*.085;ctx.stroke();
+}
+atPoint(shown,0,0,()=>drawBall(0,0),1,actorScale);
+if(phase==='bounce' && shot.hit && now-start<.32*bounceDuration){
+  drawHoop(now,true);
 }
 px=feet.x;py=feet.y;
 const activeBand = (phase==='ready'||phase==='hold') ? cycleBand(session,band,phase==='hold'?elapsed:0) : null;
