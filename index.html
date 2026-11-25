@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드</title><style>
 *{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:520px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:32px;margin:0}canvas{image-rendering:pixelated;width:100%;height:min(62dvh,540px);display:block;background:#216563;border-radius:16px;margin:14px 0;touch-action:none}button,select{font:inherit;border:0;border-radius:10px;padding:10px;background:#fff4d3;color:#142d2e}#shoot{width:100%;touch-action:none;user-select:none;background:#ffc158;font-weight:800;font-size:20px;padding:14px}footer{margin-top:12px}p{min-height:1.5em;margin:8px 0}
-[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v15 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
+[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v16 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
@@ -338,10 +338,13 @@ function refreshPortraits() {
 refreshPortraits();
 numberInput.addEventListener('input',refreshPortraits);
 document.querySelector('#appearance').addEventListener('change',refreshPortraits);
-function drawHoop(now) {
+function currentRimRadius(){
   const [height,meters]=playerArt[outfit.actor];
   const formerWidth={'루키':22,'가드':22,'센터':22,'번개':22,'준 · 남자 7등신':13,'서진 · 여자 7등신':14}[outfit.actor];
-  const rimRadius=.8*1.05*formerWidth*meters/height;
+  return .8*1.05*formerWidth*meters/height;
+}
+function drawHoop(now) {
+  const rimRadius=currentRimRadius();
   const lift=rimHeightPixels();
   function vertex(x,depth,z){
     const p=projectCourt(x,depth);
@@ -591,7 +594,7 @@ function swish() {
   noise.start();
 }
 function release(id){if(id!==active||phase!=='hold')return;const now=performance.now();if(holdExpired(session,band.tier,now-start)){loseGrip(now);return}active=null;const power=gaugePower(session,band.tier,now-start),error=power-band.center,grade=judgeShot(power,cycleBand(session,band,now-start)),hit=grade!=='miss';
-const angle=hit?Math.PI*(.25+Math.random()*.50):Math.PI*(error<0?.28:.72)+(Math.random()-.5)*1.4,range=hit?48+Math.random()*55:110+Math.abs(error)*380;
+const angle=hit?Math.PI*(.10+Math.random()*.80):Math.PI*(error<0?.28:.72)+(Math.random()-.5)*1.4,range=hit?48+Math.random()*55:110+Math.abs(error)*380;
 shot={origin:handPosition(player.x,player.y,poseAt('flight',ballReleaseMs)),from:{...player},power,hit,perfect:grade==='perfect',end:{x:hoop.x+Math.cos(angle)*range,y:hoop.y+Math.sin(angle)*range},contact:hit?hoop.x:hoop.x+(error<0?-14:14)};phase='flight';sequence=0;start=performance.now();attempts++;statusLine.textContent='슛';tone(400,.07)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cancel()});
 function cancel(){active=null;if(phase==='hold'){phase='ready';difficulty.disabled=false;statusLine.textContent='다시 누르면 점프해요'}}
@@ -723,6 +726,21 @@ function atPoint(screen,x,y,draw,flip=1,scale=1) {
   const result=draw();ctx.restore();return result;
 }
 
+// A made basket stays in the net before it can scatter across the floor.
+function madeBasketPosition(t,end,rim,lift,scale) {
+  const netExit={x:rim.x,y:rim.y+netCourtLength*scale};
+  const radius=ballCourtDiameter*scale/2;
+  const floor=floorPoint(hoop.x,hoop.y);
+  // Overhead projection collapses height. Keep the illustrated drop legible.
+  const impact={x:floor.x,y:Math.max(rim.y+lift-radius,netExit.y+radius*.65)};
+  if(t<=.24) return {x:rim.x,y:lerp(rim.y,netExit.y,t/.24)};
+  if(t<=.56) {
+    const u=(t-.24)/.32;
+    return {x:impact.x,y:lerp(netExit.y,impact.y,u*(.45+.55*u))};
+  }
+  const u=(t-.56)/.44, landing=floorPoint(end.x,end.y);
+  return {x:lerp(impact.x,landing.x,u),y:lerp(impact.y,landing.y-radius,u)-4*u*(1-u)*scale*.85};
+}
 function frame(now){
 const finishedBounce = phase === 'bounce' && now-start >= 890;
 const finishedFumble = phase === 'fumble' && now-start >= holdRecoveryMs;
@@ -762,10 +780,24 @@ if(phase==='flight' && elapsed>=ballReleaseMs){
   shown={x:lerp(origin.x+(shot.origin.x-shot.from.x)*flip*actorScale,target.x,t),y:lerp(origin.y+(shot.origin.y-shot.from.y)*actorScale,target.y-lift,t)-95*Math.sin(Math.PI*t)};
 }else if(phase==='bounce'){
   const t=Math.min(1,(now-start)/890), u=t<.56?t/.56:(t-.56)/.44;
-  shown=floorPoint(ball.x,lerp(hoop.y,shot.end.y,t));
-  shown.y-=(t<.56?lift*(1-u)+42*Math.sin(Math.PI*u):34*Math.sin(Math.PI*u));
+  if(shot.hit) shown=madeBasketPosition(t,shot.end,rim,lift,pixelsPerMeter);
+  else {
+    shown=floorPoint(ball.x,lerp(hoop.y,shot.end.y,t));
+    shown.y-=(t<.56?lift*(1-u)+42*Math.sin(Math.PI*u):34*Math.sin(Math.PI*u));
+  }
 }
 atPoint(shown,0,0,()=>drawBall(0,0),1,actorScale);
+if(phase==='bounce' && shot.hit && now-start<.24*890){
+  // Draw the near lip over the ball while it crosses the ring.
+  const radius=currentRimRadius();
+  ctx.beginPath();
+  for(let i=0;i<=16;i++){
+    const a=i*Math.PI/16-cameras[camera.value].angle;
+    const p=projectCourt(radius*Math.cos(a),1.575+radius*Math.sin(a));
+    if(i)ctx.lineTo(p.x,p.y-lift);else ctx.moveTo(p.x,p.y-lift);
+  }
+  ctx.strokeStyle='#ff8939';ctx.lineWidth=pixelsPerMeter*.085;ctx.stroke();
+}
 px=feet.x;py=feet.y;
 const activeBand = (phase==='ready'||phase==='hold') ? cycleBand(session,band,phase==='hold'?elapsed:0) : null;
 if((phase==='ready'||phase==='hold') && session.motion==='dial'){
