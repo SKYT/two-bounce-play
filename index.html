@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드</title><style>
 *{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:520px;margin:auto;padding:16px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:32px;margin:0}canvas{image-rendering:pixelated;width:100%;height:min(62dvh,540px);display:block;background:#216563;border-radius:16px;margin:14px 0;touch-action:none}button,select{font:inherit;border:0;border-radius:10px;padding:10px;background:#fff4d3;color:#142d2e}#shoot{width:100%;touch-action:none;user-select:none;background:#ffc158;font-weight:800;font-size:20px;padding:14px}footer{margin-top:12px}p{min-height:1.5em;margin:8px 0}
-[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v21 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
+[hidden]{display:none!important}.menu{display:grid;gap:14px;padding:24px 0}.primary{background:#ffc158;font-weight:bold}footer{flex-wrap:wrap}#appearance{min-width:0}#roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#roster button{padding:4px 4px 7px;border:3px solid transparent}#roster button[aria-pressed=true]{border-color:#ffc158;background:#ffe2a0;font-weight:800}#roster button[aria-pressed=true]::after{content:' ✓'}#roster canvas{width:100%;height:auto;margin:0 0 4px;border-radius:6px;touch-action:auto}#court canvas{height:auto;aspect-ratio:4/5}</style><main><header><h1>투바운드</h1></header><section id="home" class="menu"><p id="homePlayer">선수 · 루키</p><strong id="homeRecord"></strong><button id="play" class="primary">게임 시작</button><button id="options">설정</button><details id="ranking"><summary>난이도별 기록</summary><ul id="rankList"></ul></details></section><section id="court" hidden><strong id="score">0 / 0 슛</strong><span id="tierStatus"></span><p id="missCount" aria-live="polite"></p><p id="records"></p><p id="milestone" aria-live="polite"></p><label>테스트 카메라 · v22 <select id="camera"><option value="top">탑뷰</option><option value="side">사이드뷰</option><option value="quarter">쿼터뷰</option></select></label><canvas aria-label="농구 코트와 슛 파워 게이지"></canvas><p id="status" aria-live="polite">자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요</p><button id="shoot">꾹 눌러 점프슛</button><section id="gameOver" hidden><h2>게임 오버</h2><p id="result"></p><button id="retry" class="primary">다시 도전</button></section><footer><button id="leave">게임 종료 후 홈으로</button></footer></section><section id="settings" class="menu" hidden><h2>설정</h2><label>난이도 <select id="level"><option value=".45">쉬움 · Lv.1</option><option value=".18">보통 · Lv.3</option><option value=".10">어려움 · Lv.5</option></select></label><label>게이지 방식 <select id="motion"><option value="classic">원샷 · 끝에 닿으면 실패</option><option value="bounce">왕복 · 위아래로 반복</option><option value="dial">원형 · 시계 방향으로 반복</option></select></label>
 <label>게이지 속도 <select id="pace"><option value="classic">기존 속도 · 0.95초</option><option value="auto">단계별 · 1.2초 → 1초</option><option value="slow">느림 · 1.2초</option><option value="normal">보통 · 1초</option><option value="fast">빠름 · 0.75초</option></select><small> 편도 또는 한 바퀴 기준 · 왕복이나 회전을 마칠 때마다 목표 띠가 좁고 흐려져요</small></label><label><input type="checkbox" id="randomBand"> 랜덤 목표 띠</label><label><input type="checkbox" id="promotion"> 10골마다 승급 <small id="promotionHint"></small></label><label><input type="checkbox" id="fadeBand"> 상급 목표 띠 숨기기 <small>Lv.4부터 적용</small></label><button id="sound" aria-pressed="true">소리 켜짐</button><button id="haptic" aria-pressed="true">진동 켜짐</button><fieldset id="appearance" class="menu"><legend>선수와 테마</legend><div id="roster" role="group" aria-label="선수 선택"></div><label>테마 프리셋 <select id="preset"><option value="" hidden>직접 설정</option><option>그린 코트</option><option>나이트 게임</option><option>우드 아레나</option></select></label><input id="actor" type="hidden">
 <label>코트 <select id="floor"><option>그린</option><option>야간</option><option>우드</option></select></label>
 <label>공 <select id="skinBall"><option>오렌지</option><option>아이스</option><option>라임</option><option value="클래식" disabled>클래식 농구공 · 누적 5골</option></select></label>
@@ -158,7 +158,7 @@ function handPosition(x,ground,pose,actor=outfit.actor) {
   return {x:x+face*(13-6*pose.reach),y:ground-24-height-(actor==='번개'?3:0)-pose.jump+5*pose.bend-24*pose.reach};
 }
 // Arcade ball diameter in court units, shared by the entire roster.
-const ballCourtDiameter=1.04;
+const ballCourtDiameter=.40;
 const netCourtLength=1.2*ballCourtDiameter;
 // Sprite height and corresponding court height.
 const playerArt = {
@@ -220,6 +220,16 @@ function modelTexture(model,actor){
     }
   }
   brush.putImageData(data,0,0);model.colors.set(key,layer);return layer;
+}
+const courtBalls={};
+for(const [skin,fill] of Object.entries({오렌지:'#ef913b',아이스:'#a6ddf0',라임:'#bbe660',클래식:'#c17d4d'})){
+  const art=document.createElement('canvas');art.width=art.height=24;
+  const pen=art.getContext('2d');
+  pen.beginPath();pen.arc(12,12,11,0,Math.PI*2);pen.fillStyle=fill;pen.fill();
+  pen.strokeStyle='#513321';pen.lineWidth=1.8;pen.stroke();
+  pen.save();pen.clip();pen.beginPath();pen.moveTo(1,12);pen.lineTo(23,12);
+  pen.moveTo(10,1);pen.quadraticCurveTo(18,13,10,23);pen.stroke();pen.restore();
+  pen.fillStyle='#ffe2a5';pen.fillRect(6,5,3,2);courtBalls[skin]=art;
 }
 function makeRenderer(ctx) {
   function tile(x,y,w,h,color) {
@@ -436,13 +446,8 @@ function makeRenderer(ctx) {
     return hand;
   }
   function drawBall(x,y,actor=outfit.actor) {
-    const [height,meters]=playerArt[actor];
-    const scale=ballCourtDiameter*height/(16*meters);
-    ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
-    if(outfit.skinBall==='오렌지' && referenceSheet.complete && referenceSheet.naturalWidth){
-      ctx.drawImage(referenceSheet,256,0,32,32,-8,-8,16,16);
-    }else sprite(-8,-8,['..kkkk..','.khlhlk.','khhlhhlk','kllllllk','kbbblbbk','kbblbblk','.kblblk.','..kkkk..'],{k:ink,l:'#664739',h:'#fff3c3',b:{오렌지:'#ff983b',아이스:'#bceeff',라임:'#d6ff65',클래식:'#c26f37'}[outfit.skinBall]});
-    ctx.restore();
+    const [height,meters]=playerArt[actor],diameter=ballCourtDiameter*height/meters;
+    ctx.drawImage(courtBalls[outfit.skinBall],x-diameter/2,y-diameter/2,diameter,diameter);
   }
   return {tile,pixelLine,drawPlayer,drawBall};
 }
@@ -478,12 +483,16 @@ function refreshPortraits() {
 refreshPortraits();
 numberInput.addEventListener('input',refreshPortraits);
 document.querySelector('#appearance').addEventListener('change',refreshPortraits);
-function currentRimRadius(){
-  const [height,meters]=playerArt[outfit.actor];
-  const formerWidth={'루키':22,'가드':22,'센터':22,'번개':22,'준 · 남자 7등신':13,'서진 · 여자 7등신':14,구지:20}[outfit.actor];
-  return .8*1.05*formerWidth*meters/height;
-}
+function currentRimRadius(){return .26}
+const hoopLayer=document.createElement('canvas');
+hoopLayer.width=width;hoopLayer.height=height;
+const hoopPen=hoopLayer.getContext('2d');
 function drawHoop(now,foreground=false) {
+  hoopPen.clearRect(0,0,width,height);
+  paintHoopPixels(hoopPen,now,foreground);
+  ctx.drawImage(hoopLayer,0,0);
+}
+function paintHoopPixels(ctx,now,foreground) {
   const rimRadius=currentRimRadius();
   const lift=rimHeightPixels();
   function vertex(x,depth,z){
@@ -497,7 +506,7 @@ function drawHoop(now,foreground=false) {
     ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.stroke();
   }
   // The endline and both board edges run along the court's x axis.
-  const front=1.575-1.365-.10, back=front-.20, half=1.638, low=2.90, high=3.95;
+  const front=1.575-rimRadius-.10, back=front-.11, half=.90, low=2.90, high=3.95;
   const frontFace=(w,y,b,t)=>[vertex(-w,y,b),vertex(w,y,b),vertex(w,y,t),vertex(-w,y,t),vertex(-w,y,b)];
   const edge='#56574e';
   if(!foreground){
@@ -507,18 +516,20 @@ function drawHoop(now,foreground=false) {
   shape([vertex(0,-.38,3.45),vertex(0,back,3.45)],'#c2c0b0',2);
   const cosine=Math.cos(cameras[camera.value].angle);
   if(cosine>.001 && lift>0){
-    shape(frontFace(half,front,low,high),edge,1.5,'#e8e5dc');
+    shape(frontFace(half,front,low,high),edge,3,'#deddd2');
+    shape([vertex(-half+.04,front,low+.04),vertex(-half+.04,front,high-.04),vertex(half-.04,front,high-.04)],'#fff7dc',2);
     shape(frontFace(.32,front,3.05,3.55),'#5e5c56',1.5);
   }
   shape([vertex(-half,back,high),vertex(half,back,high),vertex(half,front,high),vertex(-half,front,high)],edge,1,'#e2f1e7');
   if(Math.abs(Math.sin(cameras[camera.value].angle))>.001){
-    shape([vertex(-half,back,low),vertex(-half,front,low),vertex(-half,front,high),vertex(-half,back,high)],edge,1,'#99998a');
+    const side=Math.sign(Math.sin(cameras[camera.value].angle))*half;
+    shape([vertex(side,back,low),vertex(side,front,low),vertex(side,front,high),vertex(side,back,high)],edge,1,'#99998a');
   }
   shape([vertex(0,front,3.05),vertex(0,1.575-rimRadius,3.05)],'#af562f',3);
   }
   function ring(t,z,r){return vertex(r*Math.cos(t),1.575+r*Math.sin(t),z);}
   // Anchor the lowest net knot in screen space so camera tilt cannot shorten it.
-  const netSteps=10;
+  const netSteps=8;
   const knots=Array.from({length:netSteps},(_,i)=>ring((i+.5)*2*Math.PI/netSteps,3.05,rimRadius*.62));
   const rimCenter=vertex(0,1.575,3.05);
   const netDrop=rimCenter[1]+netCourtLength*courtScale(cameras[camera.value].angle)-Math.max(...knots.map(p=>p[1]));
@@ -542,7 +553,7 @@ function drawHoop(now,foreground=false) {
     shape([left,midLeft,tip,midRight,right],'#f6ebcf',1.2);
   }
   const rim=Array.from({length:foreground?13:25},(_,i)=>ring(i*Math.PI/12-(foreground?cameras[camera.value].angle:0),3.05,rimRadius));
-  const stroke=courtScale(cameras[camera.value].angle)*.085;
+  const stroke=Math.max(1.5,courtScale()*.035);
   shape(rim,'#493334',stroke+1);shape(rim,'#ff8939',stroke);
 }
 const tiers = [
@@ -827,28 +838,45 @@ const camera = document.getElementById('camera');
 const cameras = {
   top: {angle:0, depth:1},
   side: {angle:-Math.PI/2, depth:.14},
-  quarter: {angle:-Math.PI/4, depth:.46}
+  quarter: {angle:Math.PI/4, depth:.46}
 };
-camera.value = Object.hasOwn(cameras,readSetting('camera')) ? readSetting('camera') : 'top';
+camera.value = Object.hasOwn(cameras,readSetting('camera')) ? readSetting('camera') : 'quarter';
+const requestedCamera=new URLSearchParams(location.search).get('camera');
+if(Object.hasOwn(cameras,requestedCamera))camera.value=requestedCamera;
 camera.onchange = () => saveSetting('camera',camera.value);
-function courtScale(angle) {
-  return 364/(15*Math.abs(Math.cos(angle))+14*Math.abs(Math.sin(angle)));
+// Court metres are shared by the floor, hoop, ball and all player sprites.
+const closeCourtScale=64;
+let framing={scale:closeCourtScale,x:0,y:0};
+function courtScale(){return framing.scale}
+function rimHeightPixels(){
+  return 3.05*framing.scale*Math.sqrt(1-cameras[camera.value].depth**2);
 }
-function rimHeightPixels() {
-  const {angle,depth}=cameras[camera.value];
-  return 3.05*courtScale(angle)*Math.sqrt(1-depth*depth);
+function courtDepth(y){
+  return y<=105?(y-52)*1.575/53:y<=330?1.575+(y-105)*4.225/225:5.8+(y-330)*8.2/148;
 }
-function projectCourt(x,y) {
-  const {angle,depth}=cameras[camera.value];
-  const c=Math.cos(angle), s=Math.sin(angle);
-  const scale=courtScale(angle);
-  return {x:200+scale*(x*c-(y-7)*s), y:275+scale*depth*(x*s+(y-7)*c)};
+function cameraPlane(x,y){
+  const {angle,depth}=cameras[camera.value],c=Math.cos(angle),s=Math.sin(angle);
+  return {x:x*c-y*s,y:(x*s+y*c)*depth};
 }
-function floorPoint(x,y) {
-  // Preserve the simulation's baseline, basket, free throw and halfway anchors.
-  const meters=y<=105?(y-52)*1.575/53:y<=330?1.575+(y-105)*4.225/225:5.8+(y-330)*8.2/148;
-  return projectCourt((x-200)*15/368,meters);
+function frameCourt(now){
+  let x=player.x,y=player.y;
+  if(phase==='bounce'){
+    const t=Math.min(1,(now-start)/(shot.hit?1420:890));
+    x=lerp(x,shot.end.x,t);y=lerp(y,shot.end.y,t);
+  }
+  const feet=cameraPlane((x-200)*15/368,courtDepth(y));
+  const basket=cameraPlane(0,1.575),vertical=Math.sqrt(1-cameras[camera.value].depth**2);
+  const left=Math.min(feet.x-.85,basket.x-1.6),right=Math.max(feet.x+.85,basket.x+1.6);
+  const top=Math.min(feet.y-3.4,basket.y-4.25*vertical-.65);
+  const bottom=Math.max(feet.y+.45,basket.y+.75);
+  const scale=Math.min(closeCourtScale,(width-16)/(right-left),(height-78)/(bottom-top));
+  framing={scale,x:width/2-(left+right)*scale/2,y:height/2+16-(top+bottom)*scale/2};
 }
+function projectCourt(x,y){
+  const p=cameraPlane(x,y);
+  return {x:framing.x+p.x*framing.scale,y:framing.y+p.y*framing.scale};
+}
+function floorPoint(x,y){return projectCourt((x-200)*15/368,courtDepth(y))}
 function paintCourt() {
   function path(points,close=false) {
     ctx.beginPath();
@@ -897,7 +925,10 @@ if (misses >= missLimit && (finishedBounce || finishedFumble)) {
   endGame();
   return;
 }
-if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height}ctx.clearRect(0,0,width,height);
+const resolution=Math.max(1,Math.min(4,Math.ceil(canvas.clientWidth*(window.devicePixelRatio||1)/width)));
+if(canvas.width!==width*resolution||canvas.height!==height*resolution){canvas.width=width*resolution;canvas.height=height*resolution}
+ctx.setTransform(resolution,0,0,resolution,0,0);ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,width,height);
+frameCourt(now);
 paintCourt();
 const rim=floorPoint(hoop.x,hoop.y), lift=rimHeightPixels();
 rim.y-=lift;
@@ -910,7 +941,7 @@ drawHoop(now);
 let px=player.x,py=player.y;if(phase==='bounce'){const t=Math.min(1,(now-start)/bounceDuration);px=lerp(px,shot.end.x,t);py=lerp(py,shot.end.y,t)}
 const pose=poseAt(phase,elapsed);const feet=floorPoint(px,py);
 const flip=(px>hoop.x?-1:1)*(feet.x>rim.x?-1:1);
-const pixelsPerMeter=courtScale(cameras[camera.value].angle);
+const pixelsPerMeter=courtScale();
 const [sourceHeight,meters]=playerArt[outfit.actor];
 const actorScale=pixelsPerMeter*meters/sourceHeight;
 const hand=atPoint(feet,px,py,()=>drawPlayer(px,py,pose),flip,actorScale);if(phase==='ready'||phase==='hold'||(phase==='flight' && elapsed<detach))ball=hand;
