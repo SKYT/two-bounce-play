@@ -17,6 +17,10 @@
     #roster button {display:flex;align-items:center;justify-content:center;gap:4px;flex:1;background:#193c3b;color:#fff4d3;border:2px solid transparent;font-weight:700}
     #roster button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
     .portrait {display:block;width:56px;height:56px;image-rendering:pixelated;background-position:top left;background-repeat:no-repeat}
+    @media (max-width: 420px) {
+      #roster button {min-width:0;padding:6px 3px;gap:2px;white-space:nowrap}
+      .portrait {width:40px;height:40px;flex-shrink:0}
+    }
     .primary { background: #ffc158; font-weight: bold }
     #shoot { width: 100%; touch-action: none; user-select: none; font-size: 20px; padding: 14px }
     footer { margin-top: 12px }
