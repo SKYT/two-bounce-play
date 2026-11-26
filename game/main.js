@@ -1,5 +1,5 @@
 import {scene as baseScene, rules} from './defaults.js';
-import {roster, initialPlayer} from './roster.js?roster=5';
+import {roster, initialPlayer} from './roster.js?roster=6';
 import {createRenderer} from './render.js';
 import {newMatch, charge, cancelCharge, release, advance} from './match.js';
 import {enableAudio, tone, swish} from './audio.js';

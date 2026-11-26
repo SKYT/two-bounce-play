@@ -13,12 +13,12 @@
     #home { display: grid; gap: 14px; padding: 24px 0 }
     canvas { image-rendering: pixelated; width: 100%; aspect-ratio: 4/5; display: block; border-radius: 16px; margin: 14px 0; touch-action: none }
     button { font: inherit; border: 0; border-radius: 10px; padding: 10px; background: #fff4d3; color: #142d2e }
-    #roster {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    #roster {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
     #roster button {display:flex;align-items:center;justify-content:center;gap:4px;flex:1;background:#193c3b;color:#fff4d3;border:2px solid transparent;font-weight:700}
     #roster button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
-    .portrait {display:block;width:56px;height:56px;image-rendering:pixelated;background-position:top left;background-repeat:no-repeat}
+    .portrait {display:block;width:48px;height:48px;image-rendering:pixelated;background-position:top left;background-repeat:no-repeat}
     @media (max-width: 480px) {
-      #roster {grid-template-columns:repeat(2,minmax(0,1fr))}
+      #roster {grid-template-columns:repeat(3,minmax(0,1fr))}
       #roster button {min-width:0;padding:6px 3px;gap:2px;white-space:nowrap}
       .portrait {width:40px;height:40px;flex-shrink:0}
     }
@@ -45,6 +45,6 @@
       <footer><button id="leave">게임 종료 후 홈으로</button></footer>
     </section>
   </main>
-  <script type="module" src="./game/main.js?roster=5"></script>
+  <script type="module" src="./game/main.js?roster=6"></script>
 </body>
 </html>
