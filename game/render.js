@@ -83,6 +83,7 @@ export async function createRenderer(canvas, scene, rules) {
     const feet = view.floor(focus), floor = view.project(0,scene.hoop.depthM);
     const rim = {x:floor.x,y:floor.y-view.lift};
     let face = feet.x > rim.x ? -1 : 1;
+    const aim = face;
     const scale = view.scale*scene.player.heightM/scene.player.standingPixels;
     const diameter = view.scale*scene.ball.diameterM, netLength = view.scale*scene.hoop.netLengthM;
     const age = now-game.goalAt;
@@ -144,7 +145,22 @@ export async function createRenderer(canvas, scene, rules) {
       center.y = u < .35 ? mix(from.y,ground,(u/.35)**2) :
         ground-scale*(u < .7 ? 15*Math.sin(Math.PI*(u-.35)/.35) : 7*Math.sin(Math.PI*(u-.7)/.3));
     }
-    ctx.drawImage(ball,center.x-diameter/2,center.y-diameter/2,diameter,diameter);
+    // Backspin: the top of the ball turns away from the hoop while it flies and keeps rolling on the bounces.
+    let spin = 0;
+    if (!motion.matches && (scene.ball.spinTurnsPerSecond||0) > 0) {
+      const flying = phase === 'flight' && elapsed >= detach ? elapsed-detach : 0;
+      const air = phase === 'bounce' ? rules.flightMs+elapsed*.6 : flying;
+      spin = -aim*2*Math.PI*scene.ball.spinTurnsPerSecond*Math.max(0,air)/1000;
+    }
+    if (spin) {
+      ctx.save();
+      ctx.translate(center.x,center.y);
+      ctx.rotate(spin);
+      ctx.drawImage(ball,-diameter/2,-diameter/2,diameter,diameter);
+      ctx.restore();
+    } else {
+      ctx.drawImage(ball,center.x-diameter/2,center.y-diameter/2,diameter,diameter);
+    }
     if (phase === 'bounce' && shot.hit && bounce < .32) drawHoop(ctx,view,scene,age,motion.matches,true);
     if (phase === 'hold' || phase === 'ready') gauge(ctx,feet,band,phase === 'hold' ? elapsed/rules.chargeMs : 0);
     drawGoal(ctx,rim,age,shot?.perfect,motion.matches);
