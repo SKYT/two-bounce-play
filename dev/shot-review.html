@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>투바운드 · 슛폼 검수</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}
+main{max-width:440px;padding:16px;margin:auto}h1{font-size:24px}select,button{font:inherit;padding:6px 9px}
+#poses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:12px 0}
+figure{margin:0;text-align:center;background:#216563}figcaption{font-size:14px;padding:4px}
+canvas{display:block;image-rendering:pixelated}figure canvas{width:min(100%,128px);margin:auto}#court{width:100%;aspect-ratio:4/5;margin-top:8px}
+</style>
+<main><h1>선수 슛폼 검수</h1><label>선수 <select id="player"></select></label>
+<div id="poses">
+<figure><canvas width="128" height="128"></canvas><figcaption>릴리즈 직전</figcaption></figure>
+<figure><canvas width="128" height="128"></canvas><figcaption>공 분리</figcaption></figure>
+<figure><canvas width="128" height="128"></canvas><figcaption>팔로스루</figcaption></figure>
+</div>
+<button id="normal" disabled>실제 속도</button> <button id="slow" disabled>¼배속</button>
+<p id="status" role="status"></p><canvas id="court" aria-label="코트에서 재생한 점프슛"></canvas></main>
+<script type="module">
+import {roster, initialPlayer} from '../game/roster.js?roster=5';
+import {loadPlayer} from '../game/player-renderer.js';
+import {createRenderer} from '../game/render.js';
+import {newMatch, charge, release} from '../game/match.js';
+import {scene,rules} from '../game/defaults.js';
+
+const el = id => document.getElementById(id);
+const select = el('player'), status = el('status'), court = el('court');
+for (const [id,spec] of roster) select.add(new Option(spec.name,id));
+const requested = new URLSearchParams(location.search).get('player');
+select.value = initialPlayer(requested,'navi');
+let animation, version = 0;
+
+async function show() {
+  const current = ++version;
+  cancelAnimationFrame(animation);
+  el('normal').disabled = el('slow').disabled = true;
+  status.textContent = '도트 불러오는 중';
+  const spec = roster.get(select.value);
+  try {
+    const [actor,draw] = await Promise.all([loadPlayer(spec),createRenderer(court,{...scene,player:spec},rules)]);
+    if (current !== version) return;
+    const detach = spec.releaseMs;
+    const following = spec.poses.flight.find(([ms]) => ms > detach);
+    const times = [detach-1,detach,following?.[0] ?? detach];
+    document.querySelectorAll('figure canvas').forEach((canvas,i) => {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,128,128);
+      const pose = actor.pose('flight',times[i]);
+      actor.draw(ctx,{x:64,y:118},1,1,{...pose,lift:0});
+    });
+    const game = newMatch();
+    const shotStart = rules.chargeMs * game.band.center;
+    charge(game,0);
+    release(game,shotStart,()=>.5);
+    draw(game,shotStart+detach);
+    status.textContent = spec.name+' · 버튼을 놓고 '+detach+'ms에 공 분리';
+    function play(rate) {
+      cancelAnimationFrame(animation);
+      const start = performance.now();
+      const end = detach + rules.flightMs - 1;
+      function frame(now) {
+        const elapsed = Math.min(end,(now-start)*rate);
+        draw(game,shotStart+elapsed);
+        if (elapsed < end) animation = requestAnimationFrame(frame);
+      }
+      animation = requestAnimationFrame(frame);
+    }
+    el('normal').onclick = () => play(1);
+    el('slow').onclick = () => play(.25);
+    el('normal').disabled = el('slow').disabled = false;
+  } catch {
+    if (current === version) status.textContent = '선수를 불러오지 못했습니다. 새로고침해 주세요.';
+  }
+}
+select.onchange = show;
+show();
+</script></html>

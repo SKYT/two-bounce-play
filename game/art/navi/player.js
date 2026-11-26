@@ -2,11 +2,11 @@
 const releaseMs = 260;
 export const player = {
   name: '나비',
-  atlas: new URL('./atlas.webp', import.meta.url),
+  atlas: new URL('./atlas.webp?art=2', import.meta.url),
   cellSize: 128, columns: 4, drawSize: 128, pivot: [64,118],
   standingPixels: 96, heightM: 1.83,
   hands: [[78,57],[79,62],[74,72],[80,32],[81,19],[88,12],[85,16],[82,19],
-    [82,55],[80,27],[86,15],[83,66],[88,61],[93,57],[90,54],[95,55]],
+    [82,55],[80,27],[84,16],[83,66],[88,61],[93,57],[90,54],[95,55]],
   poses: {
     ready: [[0,0],[440,1]],
     hold: [[0,1],[65,2],[155,8],[212,3],[285,9]],
