@@ -1,4 +1,5 @@
-import {scene, rules} from './defaults.js';
+import {scene as baseScene, rules} from './defaults.js';
+import {roster, initialPlayer} from './roster.js';
 import {createRenderer} from './render.js';
 import {newMatch, charge, cancelCharge, release, advance} from './match.js';
 import {enableAudio, tone, swish} from './audio.js';
@@ -11,6 +12,7 @@ const recordKey = 'two-bounce:best:.45';
 let best = 0;
 try { best = Math.max(0,Number(localStorage.getItem(recordKey))||0); } catch {}
 let game, draw, frameId, input = null;
+let scene = baseScene;
 
 function updateScore() {
   el('score').textContent = game.goals+' / '+game.attempts+' 슛';
@@ -116,18 +118,45 @@ el('leave').onclick = () => {
 };
 function showRecord() { el('homeRecord').textContent = '최고 '+best+'연속'; }
 showRecord();
-el('homePlayer').textContent = '선수 · '+scene.player.name;
 retry.onclick = startGame;
-async function prepare() {
+const playerKey = 'two-bounce:player';
+const cards = new Map();
+let savedPlayer;
+try { savedPlayer = localStorage.getItem(playerKey); } catch {}
+for (const [id, spec] of roster) {
+  const card = document.createElement('button');
+  const portrait = document.createElement('span');
+  portrait.className = 'portrait';
+  portrait.setAttribute('aria-hidden','true');
+  portrait.style.backgroundImage = 'url("' + spec.atlas.href + '")';
+  portrait.style.backgroundSize = (spec.columns*100)+'% auto';
+  card.append(portrait, spec.name);
+  card.onclick = () => selectPlayer(id,true);
+  cards.set(id,card);
+  el('roster').append(card);
+}
+
+// A slower atlas download must never replace the player's most recent choice.
+async function selectPlayer(id, remember) {
+  const selected = {...baseScene, player:roster.get(id)};
+  scene = selected;
   play.disabled = true;
+  play.textContent = '선수 불러오는 중';
+  for (const [key,card] of cards) card.setAttribute('aria-pressed',String(key === id));
   try {
-    draw = await createRenderer(canvas,scene,rules);
+    const render = await createRenderer(canvas,selected,rules);
+    if (scene !== selected) return;
+    draw = render;
+    if (remember) {
+      try { localStorage.setItem(playerKey,id); } catch {}
+    }
     play.textContent = '게임 시작';
     play.onclick = startGame;
   } catch {
+    if (scene !== selected) return;
     play.textContent = '선수 다시 불러오기';
-    play.onclick = prepare;
+    play.onclick = () => selectPlayer(id,remember);
   }
   play.disabled = false;
 }
-prepare();
+selectPlayer(initialPlayer(new URLSearchParams(location.search).get('player'),savedPlayer),false);

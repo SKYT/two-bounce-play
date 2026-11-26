@@ -82,7 +82,7 @@ export async function createRenderer(canvas, scene, rules) {
     const view = makeProjection(scene,focus,width,height);
     const feet = view.floor(focus), floor = view.project(0,scene.hoop.depthM);
     const rim = {x:floor.x,y:floor.y-view.lift};
-    const face = feet.x > rim.x ? -1 : 1;
+    let face = feet.x > rim.x ? -1 : 1;
     const scale = view.scale*scene.player.heightM/scene.player.standingPixels;
     const diameter = view.scale*scene.ball.diameterM, netLength = view.scale*scene.hoop.netLengthM;
     const age = now-game.goalAt;
@@ -96,7 +96,18 @@ export async function createRenderer(canvas, scene, rules) {
     ctx.clearRect(0,0,width,height);
     drawCourt(ctx,view.project,scene.court,scene.hoop.depthM);
     drawHoop(ctx,view,scene,age,motion.matches);
-    const pose = actor.pose(phase,elapsed);
+    let poseState = phase;
+    let poseTime = phase === 'ready' && motion.matches ? 0 : elapsed;
+    if (phase === 'bounce' && scene.player.poses.walk) {
+      const from = view.floor(spot), to = view.floor(shot.end);
+      const distanceM = Math.hypot(to.x-from.x,to.y-from.y)/view.scale;
+      face = Math.abs(to.x-from.x) < 2 ? face : Math.sign(to.x-from.x);
+      poseState = 'walk';
+      // Match the feet to screen travel and limit cadence on long rebounds.
+      const cycles = Math.min(distanceM/scene.player.strideM,duration/380);
+      poseTime = cycles*bounce*scene.player.loopMs.walk;
+    }
+    const pose = actor.pose(poseState,poseTime);
     actor.draw(ctx,feet,face,scale,pose);
     let center = actor.hand(feet,face,scale,pose);
     const detach = scene.player.releaseMs;

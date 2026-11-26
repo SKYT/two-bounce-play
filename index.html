@@ -13,6 +13,10 @@
     #home { display: grid; gap: 14px; padding: 24px 0 }
     canvas { image-rendering: pixelated; width: 100%; aspect-ratio: 4/5; display: block; border-radius: 16px; margin: 14px 0; touch-action: none }
     button { font: inherit; border: 0; border-radius: 10px; padding: 10px; background: #fff4d3; color: #142d2e }
+    #roster {display:flex;gap:8px}
+    #roster button {display:flex;align-items:center;justify-content:center;gap:4px;flex:1;background:#193c3b;color:#fff4d3;border:2px solid transparent;font-weight:700}
+    #roster button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
+    .portrait {display:block;width:56px;height:56px;image-rendering:pixelated;background-position:top left;background-repeat:no-repeat}
     .primary { background: #ffc158; font-weight: bold }
     #shoot { width: 100%; touch-action: none; user-select: none; font-size: 20px; padding: 14px }
     footer { margin-top: 12px }
@@ -23,7 +27,8 @@
   <main>
     <header><h1>투바운드</h1></header>
     <section id="home">
-      <p id="homePlayer"></p><strong id="homeRecord"></strong>
+      <div id="roster" role="group" aria-label="선수 선택"></div>
+      <strong id="homeRecord"></strong>
       <button id="play" class="primary" disabled>선수 불러오는 중</button>
     </section>
     <section id="court" hidden>

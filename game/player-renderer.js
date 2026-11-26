@@ -5,9 +5,11 @@ export async function loadPlayer(spec) {
   return {
     pose(state, elapsed) {
       const keys = spec.poses[state] || spec.poses.ready;
+      const loop = spec.loopMs?.[state];
+      const time = loop ? elapsed % loop : elapsed;
       let cell = keys[0][1];
       for (const [start, next] of keys) {
-        if (elapsed < start) break;
+        if (time < start) break;
         cell = next;
       }
       const jump = spec.jump;
