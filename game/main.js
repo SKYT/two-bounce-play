@@ -1,6 +1,6 @@
-import {scene as baseScene, rules} from './defaults.js';
-import {roster, initialPlayer} from './roster.js?roster=7';
-import {createRenderer} from './render.js';
+import {scene as baseScene, rules} from './defaults.js?art=ball2';
+import {roster, initialPlayer} from './roster.js?roster=8';
+import {createRenderer} from './render.js?art=ball2';
 import {newMatch, charge, cancelCharge, release, advance} from './match.js';
 import {enableAudio, tone, swish} from './audio.js';
 

@@ -1,5 +1,5 @@
 import {player} from './art/guji/player.js';
-import {ball} from './art/ball.js';
+import {ball} from './art/ball.js?art=ball2';
 import {court} from './art/court.js';
 import {hoop} from './art/hoop.js';
 

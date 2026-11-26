@@ -1,6 +1,6 @@
 import {makeProjection} from './projection.js';
 import {loadPlayer} from './player-renderer.js';
-import {createBallSprite} from './art/ball.js';
+import {createBallSprite} from './art/ball.js?art=ball2';
 import {drawCourt} from './art/court.js';
 import {createHoopLayer} from './art/hoop.js';
 
