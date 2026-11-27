@@ -18,11 +18,11 @@ canvas{display:block;image-rendering:pixelated}figure canvas{width:min(100%,128p
 <button id="normal" disabled>실제 속도</button> <button id="slow" disabled>¼배속</button>
 <p id="status" role="status"></p><canvas id="court" aria-label="코트에서 재생한 점프슛"></canvas></main>
 <script type="module">
-import {loadRoster, initialPlayer} from '../game/players.js?v=a0e5e81';
-import {loadPlayer} from '../game/player-renderer.js?v=a0e5e81';
-import {createRenderer} from '../game/render.js?v=a0e5e81';
-import {newMatch, charge, release} from '../game/match.js?v=a0e5e81';
-import {scene,rules} from '../game/defaults.js?v=a0e5e81';
+import {loadRoster, initialPlayer} from '../game/players.js?v=0cfd164';
+import {loadPlayer} from '../game/player-renderer.js?v=0cfd164';
+import {createRenderer} from '../game/render.js?v=0cfd164';
+import {newMatch, charge, release} from '../game/match.js?v=0cfd164';
+import {scene,rules} from '../game/defaults.js?v=0cfd164';
 
 const el = id => document.getElementById(id);
 const select = el('player'), status = el('status'), court = el('court');
@@ -47,7 +47,10 @@ async function show() {
     const following = spec.poses.flight.find(([ms]) => ms > detach);
     const times = [detach-1,detach,following?.[0] ?? detach];
     document.querySelectorAll('figure canvas').forEach((canvas,i) => {
+      const density = Math.min(spec.cellSize / spec.drawSize, Math.max(1, window.devicePixelRatio || 1));
+      canvas.width = canvas.height = Math.round(128 * density);
       const ctx = canvas.getContext('2d');
+      ctx.setTransform(canvas.width / 128, 0, 0, canvas.height / 128, 0, 0);
       ctx.clearRect(0,0,128,128);
       const pose = actor.pose('flight',times[i]);
       actor.draw(ctx,{x:64,y:118},1,1,{...pose,lift:0});

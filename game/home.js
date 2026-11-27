@@ -1,5 +1,5 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume} from './players.js?v=a0e5e81';
+import {initialPlayer, costumesOf, initialCostume} from './players.js?v=0cfd164';
 
 const playerKey = 'two-bounce:player';
 const costumeKey = id => 'two-bounce:costume:' + id;
@@ -9,6 +9,7 @@ const save = (key, value) => { try { localStorage.setItem(key, value); } catch {
 function portrait(spec, atlas) {
   const span = document.createElement('span');
   span.className = 'portrait';
+  if (spec.cellSize > spec.drawSize) span.style.imageRendering = 'auto';
   span.setAttribute('aria-hidden', 'true');
   span.style.backgroundImage = 'url("' + atlas.href + '")';
   span.style.backgroundSize = (spec.columns * 100) + '% auto';

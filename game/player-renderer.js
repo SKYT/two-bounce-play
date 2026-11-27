@@ -37,10 +37,13 @@ export async function loadPlayer(spec) {
     },
     draw(ctx, feet, facing, scale, pose) {
       const size = spec.cellSize;
+      // On a small backing canvas several source texels can contribute to one screen pixel.
+      // Sample them together so thin facial lines survive subpixel movement.
+      const downsample = size > spec.drawSize && Math.abs(ctx.getTransform().a) * scale * spec.drawSize < size;
       ctx.save();
       ctx.translate(feet.x, feet.y - Math.round(pose.lift) * scale);
       ctx.scale(facing * scale, scale);
-      ctx.imageSmoothingEnabled = false;
+      ctx.imageSmoothingEnabled = downsample;
       const cell = pose.motionCell ?? pose.cell;
       const atlas = pose.motionCell == null ? image : motionImage;
       ctx.drawImage(atlas, cell % spec.columns * size, Math.floor(cell / spec.columns) * size,

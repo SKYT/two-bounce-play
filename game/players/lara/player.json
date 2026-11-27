@@ -2,7 +2,7 @@
   "name": "라라",
   "status": "original",
   "sheet": "costumes/cherry-pleats.webp",
-  "cellSize": 128,
+  "cellSize": 256,
   "columns": 4,
   "drawSize": 128,
   "pivot": [64,118],
