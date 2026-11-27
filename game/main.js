@@ -1,9 +1,9 @@
-import {scene as baseScene, rules} from './defaults.js?v=8573a3d';
-import {loadRoster} from './players.js?v=8573a3d';
-import {setupHome} from './home.js?v=8573a3d';
-import {createRenderer} from './render.js?v=8573a3d';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=8573a3d';
-import {enableAudio, tone, swish} from './audio.js?v=8573a3d';
+import {scene as baseScene, rules} from './defaults.js?v=02a49b2';
+import {loadRoster} from './players.js?v=02a49b2';
+import {setupHome} from './home.js?v=02a49b2';
+import {createRenderer} from './render.js?v=02a49b2';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=02a49b2';
+import {enableAudio, tone, swish} from './audio.js?v=02a49b2';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');

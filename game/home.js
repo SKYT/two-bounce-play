@@ -1,5 +1,5 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume} from './players.js?v=8573a3d';
+import {initialPlayer, costumesOf, initialCostume} from './players.js?v=02a49b2';
 
 const playerKey = 'two-bounce:player';
 const costumeKey = id => 'two-bounce:costume:' + id;
@@ -32,6 +32,30 @@ export function setupHome({roster, cardsBox, costumesBox, costumeName, query, on
     costumesBox.replaceChildren();
     costumesBox.hidden = list.length < 2;
     if (costumesBox.hidden) return;
+    const selected = list.find(c => c.id === chosen);
+    costumeName.textContent = selected.name;
+    if (spec.wardrobe) {
+      const card = cards.get(id);
+      card.replaceChildren(portrait(spec, selected.atlas), spec.name);
+      for (const [slot, label] of [['top', '상의'], ['bottom', '하의']]) {
+        const group = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        legend.textContent = label;
+        group.append(legend);
+        for (const [part, name] of Object.entries(spec.wardrobe[slot])) {
+          const other = slot === 'top' ? 'bottom' : 'top';
+          const outfit = list.find(c => c[slot] === part && c[other] === selected[other]);
+          const button = document.createElement('button');
+          button.textContent = name;
+          button.disabled = !outfit;
+          button.setAttribute('aria-pressed', String(selected[slot] === part));
+          if (outfit) button.onclick = () => choose(id, true, outfit.id);
+          group.append(button);
+        }
+        costumesBox.append(group);
+      }
+      return;
+    }
     for (const costume of list) {
       const chip = document.createElement('button');
       chip.append(portrait(spec, costume.atlas));
@@ -41,7 +65,6 @@ export function setupHome({roster, cardsBox, costumesBox, costumeName, query, on
       chip.onclick = () => choose(id, true, costume.id);
       costumesBox.append(chip);
     }
-    costumeName.textContent = list.find(c => c.id === chosen).name;
   }
 
   async function choose(id, remember, costumeId) {

@@ -1,8 +1,8 @@
-import {makeProjection} from './projection.js?v=8573a3d';
-import {loadPlayer} from './player-renderer.js?v=8573a3d';
-import {createBallSprite} from './art/ball.js?v=8573a3d';
-import {drawCourt} from './art/court.js?v=8573a3d';
-import {createHoopLayer} from './art/hoop.js?v=8573a3d';
+import {makeProjection} from './projection.js?v=02a49b2';
+import {loadPlayer} from './player-renderer.js?v=02a49b2';
+import {createBallSprite} from './art/ball.js?v=02a49b2';
+import {drawCourt} from './art/court.js?v=02a49b2';
+import {createHoopLayer} from './art/hoop.js?v=02a49b2';
 
 const width = 400, height = 500;
 const mix = (a,b,t) => a + (b-a)*t;
