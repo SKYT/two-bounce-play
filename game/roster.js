@@ -5,8 +5,9 @@ import {player as navi} from './art/navi/player.js?art=2';
 import {player as lin} from './art/lin/player.js';
 import {player as mei} from './art/mei/player.js';
 import {player as saemi} from './art/saemi/player.js';
+import {player as yunseul} from './art/yunseul/player.js';
 
-export const roster = new Map([['guji',guji], ['rio',rio], ['vera',vera], ['navi',navi], ['lin',lin], ['mei',mei], ['saemi',saemi]]);
+export const roster = new Map([['guji',guji], ['rio',rio], ['vera',vera], ['navi',navi], ['lin',lin], ['mei',mei], ['saemi',saemi], ['yunseul',yunseul]]);
 export function initialPlayer(requested, saved) {
   if (roster.has(requested)) return requested;
   return roster.has(saved) ? saved : 'guji';
