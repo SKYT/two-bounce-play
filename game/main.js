@@ -1,5 +1,5 @@
 import {scene as baseScene, rules} from './defaults.js?art=ball2';
-import {roster, initialPlayer} from './roster.js?roster=10';
+import {roster, initialPlayer, costumesOf, initialCostume} from './roster.js?roster=11';
 import {createRenderer} from './render.js?art=ball2';
 import {newMatch, charge, cancelCharge, release, advance} from './match.js';
 import {enableAudio, tone, swish} from './audio.js';
@@ -136,9 +136,39 @@ for (const [id, spec] of roster) {
   el('roster').append(card);
 }
 
+const costumeKey = id => 'two-bounce:costume:'+id;
+const query = new URLSearchParams(location.search);
+function showCostumes(id, chosen) {
+  const box = el('costumes'), list = costumesOf(roster.get(id));
+  box.replaceChildren();
+  box.hidden = list.length < 2;
+  if (box.hidden) return;
+  for (const costume of list) {
+    const chip = document.createElement('button');
+    const portrait = document.createElement('span');
+    portrait.className = 'portrait';
+    portrait.setAttribute('aria-hidden','true');
+    portrait.style.backgroundImage = 'url("' + costume.atlas.href + '")';
+    portrait.style.backgroundSize = (roster.get(id).columns*100)+'% auto';
+    chip.append(portrait);
+    chip.title = costume.name;
+    chip.setAttribute('aria-label',costume.name);
+    chip.setAttribute('aria-pressed',String(costume.id === chosen));
+    chip.onclick = () => selectPlayer(id,true,costume.id);
+    box.append(chip);
+  }
+  el('costumeName').textContent = list.find(c => c.id === chosen).name;
+}
+
 // A slower atlas download must never replace the player's most recent choice.
-async function selectPlayer(id, remember) {
-  const selected = {...baseScene, player:roster.get(id)};
+async function selectPlayer(id, remember, costumeId) {
+  const base = roster.get(id);
+  let saved;
+  try { saved = localStorage.getItem(costumeKey(id)); } catch {}
+  const costume = initialCostume(base, costumeId ?? (remember ? null : query.get('costume')), saved);
+  const outfit = costumesOf(base).find(c => c.id === costume);
+  const selected = {...baseScene, player:{...base, atlas:outfit.atlas}};
+  showCostumes(id,costume);
   scene = selected;
   play.disabled = true;
   play.textContent = '선수 불러오는 중';
@@ -148,15 +178,18 @@ async function selectPlayer(id, remember) {
     if (scene !== selected) return;
     draw = render;
     if (remember) {
-      try { localStorage.setItem(playerKey,id); } catch {}
+      try {
+        localStorage.setItem(playerKey,id);
+        if (costumesOf(base).length > 1) localStorage.setItem(costumeKey(id),costume);
+      } catch {}
     }
     play.textContent = '게임 시작';
     play.onclick = startGame;
   } catch {
     if (scene !== selected) return;
     play.textContent = '선수 다시 불러오기';
-    play.onclick = () => selectPlayer(id,remember);
+    play.onclick = () => selectPlayer(id,remember,costume);
   }
   play.disabled = false;
 }
-selectPlayer(initialPlayer(new URLSearchParams(location.search).get('player'),savedPlayer),false);
+selectPlayer(initialPlayer(query.get('player'),savedPlayer),false);
