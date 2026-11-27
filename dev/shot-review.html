@@ -17,17 +17,18 @@ canvas{display:block;image-rendering:pixelated}figure canvas{width:min(100%,128p
 <button id="normal" disabled>실제 속도</button> <button id="slow" disabled>¼배속</button>
 <p id="status" role="status"></p><canvas id="court" aria-label="코트에서 재생한 점프슛"></canvas></main>
 <script type="module">
-import {roster, initialPlayer} from '../game/roster.js?roster=11';
-import {loadPlayer} from '../game/player-renderer.js';
-import {createRenderer} from '../game/render.js?art=ball2';
-import {newMatch, charge, release} from '../game/match.js';
-import {scene,rules} from '../game/defaults.js?art=ball2';
+import {loadRoster, initialPlayer} from '../game/players.js?v=8573a3d';
+import {loadPlayer} from '../game/player-renderer.js?v=8573a3d';
+import {createRenderer} from '../game/render.js?v=8573a3d';
+import {newMatch, charge, release} from '../game/match.js?v=8573a3d';
+import {scene,rules} from '../game/defaults.js?v=8573a3d';
 
 const el = id => document.getElementById(id);
 const select = el('player'), status = el('status'), court = el('court');
+const roster = await loadRoster();
 for (const [id,spec] of roster) select.add(new Option(spec.name,id));
 const requested = new URLSearchParams(location.search).get('player');
-select.value = initialPlayer(requested,'navi');
+select.value = initialPlayer(roster,requested,'navi');
 let animation, version = 0;
 
 async function show() {

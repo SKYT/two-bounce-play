@@ -1,7 +1,9 @@
+import {asset} from '../version.js?v=8573a3d';
+
 export const ball = {
   diameterM: .40,
   // 24px pixel-art ball; the vector ball below shows until it has loaded.
-  sprite: new URL('./ball.webp', import.meta.url),
+  sprite: asset('./ball.webp', import.meta.url),
   // Backspin turns per second while the ball is in the air.
   spinTurnsPerSecond: 2.4,
   fill: '#ef913b', seam: '#513321', highlight: '#ffe2a5'

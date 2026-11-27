@@ -157,7 +157,7 @@ const playerArt = {
 };
 const gujiAtlas={image:new Image(),colors:new Map()};
 gujiAtlas.image.onload=()=>refreshPortraits();
-gujiAtlas.image.src='../game/art/guji/atlas.webp';
+gujiAtlas.image.src='../game/players/guji/atlas.webp';
 const referenceSheet=new Image();
 const referenceColors=new Map();
 referenceSheet.onload=()=>refreshPortraits();
