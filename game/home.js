@@ -1,5 +1,5 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume} from './players.js?v=02a49b2';
+import {initialPlayer, costumesOf, initialCostume} from './players.js?v=a0e5e81';
 
 const playerKey = 'two-bounce:player';
 const costumeKey = id => 'two-bounce:costume:' + id;
@@ -74,7 +74,7 @@ export function setupHome({roster, cardsBox, costumesBox, costumeName, query, on
     const outfit = costumesOf(base).find(c => c.id === costume);
     for (const [key, card] of cards) card.setAttribute('aria-pressed', String(key === id));
     showCostumes(id, costume);
-    const ready = await onChoose({...base, atlas: outfit.atlas}, () => choose(id, remember, costume));
+    const ready = await onChoose({...base, atlas: outfit.atlas, motionAtlas: outfit.motionAtlas}, () => choose(id, remember, costume));
     if (ready && remember) {
       save(playerKey, id);
       if (costumesOf(base).length > 1) save(costumeKey(id), costume);

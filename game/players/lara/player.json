@@ -47,28 +47,33 @@
       "name": "체리 탱크톱 · 플리츠스커트",
       "sheet": "costumes/cherry-pleats.webp",
       "top": "cherry",
-      "bottom": "pleats"
+      "bottom": "pleats",
+      "motionSheet": "motion/cherry-pleats.png"
     },
     {
       "id": "cherry-graphite",
       "name": "체리 탱크톱 · 그래파이트 트랙팬츠",
       "sheet": "costumes/cherry-graphite.webp",
       "top": "cherry",
-      "bottom": "graphite"
+      "bottom": "graphite",
+      "motionSheet": "motion/cherry-graphite.png"
     },
     {
       "id": "mint-pleats",
       "name": "네이비 민트 크롭티 · 플리츠스커트",
       "sheet": "costumes/mint-pleats.webp",
       "top": "mint",
-      "bottom": "pleats"
+      "bottom": "pleats",
+      "motionSheet": "motion/mint-pleats.png"
     },
     {
       "id": "mint-graphite",
       "name": "네이비 민트 크롭티 · 그래파이트 트랙팬츠",
       "sheet": "costumes/mint-graphite.webp",
       "top": "mint",
-      "bottom": "graphite"
+      "bottom": "graphite",
+      "motionSheet": "motion/mint-graphite.png"
     }
-  ]
+  ],
+  "flightMotion": [[32,75,0],[75,132,1],[383,415,2],[427,486,3],[501,543,4]]
 }

@@ -1,6 +1,6 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=02a49b2';
+import {asset} from './version.js?v=a0e5e81';
 
 const home = new URL('./players/', import.meta.url);
 
@@ -18,7 +18,9 @@ async function readJson(url) {
 export function resolvePlayer(id, data, base = new URL(id + '/', home)) {
   const spec = {...data, id, atlas: asset(data.sheet, base)};
   if (data.costumes?.length) {
-    spec.costumes = data.costumes.map(c => ({...c, atlas: asset(c.sheet, base)}));
+    spec.costumes = data.costumes.map(c => ({...c, atlas: asset(c.sheet, base),
+      motionAtlas: c.motionSheet ? asset(c.motionSheet, base) : null}));
+    spec.motionAtlas = spec.costumes.find(c => c.sheet === data.sheet)?.motionAtlas;
   }
   return spec;
 }
