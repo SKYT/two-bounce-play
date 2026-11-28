@@ -61,6 +61,7 @@
   },
   "layers": {
     "front": "layers/front.png",
+    "grip": "layers/grip.png",
     "arms": {
       "ballArm": "FFFFFFFBFBFBFFBF",
       "guideArm": "FFFBBFFFBFFFFBFF"

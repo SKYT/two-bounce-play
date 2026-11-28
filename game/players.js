@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=4f3956d';
-import {composeOutfit, prefetchParts} from './compose.js?v=4f3956d';
+import {asset} from './version.js?v=eeb94fb';
+import {composeOutfit, prefetchParts} from './compose.js?v=eeb94fb';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
@@ -34,7 +34,8 @@ async function loadForm(name, base) {
   const [form, rig, motion] = await Promise.all(['form.json', 'rig.json', 'motion.json']
     .map(file => readJson(asset(file, dir)).catch(() => null)));
   const urls = {body: asset(form.body, dir), tops: {}, bottoms: {}, heads: {}, headMasks: {}, motionMasks: {},
-    front: form.layers?.front ? asset(form.layers.front, dir) : null};
+    front: form.layers?.front ? asset(form.layers.front, dir) : null,
+    grip: form.layers?.grip ? asset(form.layers.grip, dir) : null};
   for (const [id, part] of Object.entries(form.tops)) {
     urls.tops[id] = asset(part.sheet, dir);
     if (part.motionMask) urls.motionMasks[id] = asset(part.motionMask, dir);
@@ -71,7 +72,7 @@ export async function outfitArt(spec, costumeId) {
   const costume = costumesOf(spec).find(c => c.id === costumeId) || costumesOf(spec)[0];
   if (spec.composed) {
     const art = await composeOutfit(spec.composed, costume);
-    return {url: art.url, atlasImage: art.sheet, motionImage: art.motion, atlas: null, motionAtlas: null};
+    return {url: art.url, atlasImage: art.sheet, motionImage: art.motion, gripImage: art.grip, atlas: null, motionAtlas: null};
   }
   return {url: costume.atlas.href, atlas: costume.atlas, motionAtlas: costume.motionAtlas ?? spec.motionAtlas ?? null};
 }

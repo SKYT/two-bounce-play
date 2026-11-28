@@ -1,10 +1,10 @@
-import {loadPlayer} from './player-renderer.js?v=4f3956d';
-import {createBallSprite} from './art/ball.js?v=4f3956d';
-import {drawCourt} from './art/court.js?v=4f3956d';
-import {createHoopLayer} from './art/hoop.js?v=4f3956d';
+import {loadPlayer} from './player-renderer.js?v=eeb94fb';
+import {createBallSprite} from './art/ball.js?v=eeb94fb';
+import {drawCourt} from './art/court.js?v=eeb94fb';
+import {createHoopLayer} from './art/hoop.js?v=eeb94fb';
 
-import {layoutFrame, COURT_SIZE} from './frame.js?v=4f3956d';
-export {hitStop} from './frame.js?v=4f3956d';
+import {layoutFrame, COURT_SIZE} from './frame.js?v=eeb94fb';
+export {hitStop} from './frame.js?v=eeb94fb';
 
 const {width, height} = COURT_SIZE;
 
@@ -135,6 +135,7 @@ export async function createRenderer(canvas, scene, rules) {
     } else {
       ctx.drawImage(ball,x-diameter/2,y-diameter/2,diameter,diameter);
     }
+    if (f.grip) actor.drawGrip(ctx,f.feet,f.face,f.scale,f.pose);
     if (f.netInFront) drawHoop(ctx,f.view,scene,f.goal.age,reduced,true);
     if (f.gauge) gauge(ctx,f.feet,f.gauge.band,f.gauge.power);
     if (mirror) ctx.transform(-1,0,0,1,width,0);

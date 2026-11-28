@@ -36,7 +36,11 @@ export async function loadPlayer(spec) {
       return {x: feet.x + facing * scale * (x - spec.pivot[0]),
         y: feet.y + scale * (y - spec.pivot[1] - pose.lift)};
     },
-    draw(ctx, feet, facing, scale, pose) {
+    // Fingers over the ball (composed players with layers/grip.png): call after drawing the held ball.
+    drawGrip(ctx, feet, facing, scale, pose) {
+      if (spec.gripImage && pose.motionCell == null) this.draw(ctx, feet, facing, scale, pose, spec.gripImage);
+    },
+    draw(ctx, feet, facing, scale, pose, sheet = null) {
       const size = spec.cellSize;
       // On a small backing canvas several source texels can contribute to one screen pixel.
       // Sample them together so thin facial lines survive subpixel movement.
@@ -46,7 +50,7 @@ export async function loadPlayer(spec) {
       ctx.scale(facing * scale, scale);
       ctx.imageSmoothingEnabled = downsample;
       const cell = pose.motionCell ?? pose.cell;
-      const atlas = pose.motionCell == null ? image : motionImage;
+      const atlas = sheet ?? (pose.motionCell == null ? image : motionImage);
       ctx.drawImage(atlas, cell % spec.columns * size, Math.floor(cell / spec.columns) * size,
         size, size, -spec.pivot[0], -spec.pivot[1], spec.drawSize, spec.drawSize);
       ctx.restore();

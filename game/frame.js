@@ -1,7 +1,7 @@
 // Where everything is on one frame, as plain data: camera, player pose, ball, shadows, effects.
 // render.js only draws what this returns, so the rules of motion can be tested in Node and a different
 // renderer (PixiJS, a replay exporter) can reuse them unchanged.
-import {makeProjection} from './projection.js?v=4f3956d';
+import {makeProjection} from './projection.js?v=eeb94fb';
 
 export const COURT_SIZE = {width: 400, height: 500};
 const mix = (a,b,t) => a + (b-a)*t;
@@ -175,6 +175,8 @@ export function layoutFrame({game, now, scene, rules, actor, reduced = false, si
     view, feet, rim, face, scale, pose, ghosts, shadows, shake, ripple, dust, rimWobble, glow,
     ball: {x:center.x, y:center.y, diameter, spin, floor:ballFloor},
     netInFront: phase === 'bounce' && shot.hit && bounce < .32,
+    // the ball is in the hands: the fingers that close over it are drawn after it
+    grip: phase === 'ready' || phase === 'hold' || (phase === 'flight' && elapsed < detach),
     gauge: phase === 'hold' || phase === 'ready' ? {band, power: phase === 'hold' ? elapsed/rules.chargeMs : 0} : null,
     goal: {age: now-game.goalAt, perfect: shot?.perfect}
   };

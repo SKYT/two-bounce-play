@@ -1,4 +1,4 @@
-import {asset} from '../version.js?v=4f3956d';
+import {asset} from '../version.js?v=eeb94fb';
 
 export const ball = {
   diameterM: .40,

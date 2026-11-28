@@ -27,6 +27,20 @@ export function restoreFront(dressed, body, top, front) {
   return {width: dressed.width, height: dressed.height, data: out};
 }
 
+// Pixels of `sheet` (scale × the 1x mask) where `mask` is set; the rest transparent.
+export function maskSheet(sheet, mask, scale) {
+  const out = new Uint8ClampedArray(sheet.data.length);
+  for (let y = 0; y < sheet.height; y++) {
+    const row = Math.floor(y / scale) * mask.width;
+    for (let x = 0; x < sheet.width; x++) {
+      if (!isSet(mask, (row + Math.floor(x / scale)) * 4)) continue;
+      const i = (y * sheet.width + x) * 4;
+      out[i] = sheet.data[i]; out[i + 1] = sheet.data[i + 1]; out[i + 2] = sheet.data[i + 2]; out[i + 3] = sheet.data[i + 3];
+    }
+  }
+  return {width: sheet.width, height: sheet.height, data: out};
+}
+
 export function upscale(image, k) {
   const width = image.width * k, height = image.height * k, out = new Uint8ClampedArray(width * height * 4);
   for (let y = 0; y < height; y++) {
@@ -118,7 +132,9 @@ export function buildOutfit(form, outfit) {
     const strip = bakeMotion(uniform, images.motionMasks[outfit.top], form.motion, amplitude, rig.cellSize, rig.columns);
     motion = head ? addHead(strip, head, scale, form.motion.frames.map(f => f[0]), rig.cellSize, rig.columns, front) : strip;
   }
-  return {sheet, motion, cellSize: rig.cellSize * scale};
+  // fingers that close over the ball, drawn again after the ball (layers/grip.png)
+  const grip = images.grip ? maskSheet(sheet, images.grip, scale) : null;
+  return {sheet, motion, grip, cellSize: rig.cellSize * scale};
 }
 
 // ---- browser side ----
@@ -151,11 +167,11 @@ const decodeOnce = url => {
 async function partsFor(form, outfit) {
   const head = outfit.head ?? form.defaultHead, {urls} = form;
   const one = async (map, id) => (map[id] ? {[id]: await decodeOnce(map[id])} : {});
-  const [body, tops, bottoms, heads, headMasks, motionMasks, front] = await Promise.all([
+  const [body, tops, bottoms, heads, headMasks, motionMasks, front, grip] = await Promise.all([
     decodeOnce(urls.body), one(urls.tops, outfit.top), one(urls.bottoms, outfit.bottom),
     one(urls.heads, head), one(urls.headMasks, head), one(urls.motionMasks, outfit.top),
-    urls.front ? decodeOnce(urls.front) : null]);
-  return {...form, images: {body, tops, bottoms, heads, headMasks, motionMasks, front}};
+    urls.front ? decodeOnce(urls.front) : null, urls.grip ? decodeOnce(urls.grip) : null]);
+  return {...form, images: {body, tops, bottoms, heads, headMasks, motionMasks, front, grip}};
 }
 
 // After a form player is shown, fetch the rest of their wardrobe in the background so switching is instant.
@@ -172,7 +188,8 @@ export async function composeOutfit(form, outfit) {
       const built = buildOutfit(await partsFor(form, outfit), outfit);
       const sheet = toCanvas(built.sheet);
       let url; // PNG encoding is slow: only when a portrait actually needs this outfit as an image URL
-      return {sheet, motion: built.motion && toCanvas(built.motion), cellSize: built.cellSize,
+      return {sheet, motion: built.motion && toCanvas(built.motion), grip: built.grip && toCanvas(built.grip),
+        cellSize: built.cellSize,
         get url() {
           url ??= new Promise(resolve => sheet.toBlob(resolve, 'image/png')).then(blob => URL.createObjectURL(blob));
           return url;
