@@ -45,5 +45,10 @@
       "name": "진홍 라인 레깅스",
       "sheet": "leggings.png"
     }
+  },
+  "cover": {
+    "top": "cover/top.png",
+    "bottom": "cover/bottom.png",
+    "accessory": "cover/accessory.png"
   }
 }
