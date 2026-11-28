@@ -1,49 +1,64 @@
 {
-  "base": "female-healthy",
-  "version": "f0b16a50",
-  "standIn": true,
-  "rig": {
-    "cellSize": 128,
-    "columns": 4,
-    "pivot": [64,118],
-    "poses": {
-      "ready": [[0,0],[470,1]],
-      "hold": [[0,1],[60,2],[130,8],[205,9],[265,3]],
-      "flight": [[0,3],[75,4],[155,10],[215,5],[300,6],[375,11],[415,7],[550,1],[650,0]],
-      "walk": [[0,12],[130,13],[260,14],[390,15]],
-      "fumble": [[0,3],[80,9],[140,8],[220,2],[500,1],[710,0]]
-    },
-    "loopMs": {
-      "ready": 880,
-      "walk": 520
-    },
-    "releaseMs": 215
-  },
-  "note": "임시 기준: 여성 · 건강 볼륨 (라라 기준 폼). 쌔미 노말(017)이 들어오면 다시 만든다",
-  "types": [
+  "version": "e7f50240",
+  "sexes": [
     {
-      "id": "female-slim",
-      "name": "마른몸",
-      "kind": "preview",
-      "morph": {
-        "limbs": -1,
-        "chest": -1,
-        "hip": -1
-      },
-      "note": "미리보기(기준에서 변형)"
-    },
-    {
-      "id": "female-normal",
-      "name": "노말",
-      "kind": "waiting",
-      "note": "쌔미 맨살 마네킹 대기(GPT 017)"
-    },
-    {
-      "id": "female-healthy",
-      "name": "건강 볼륨",
-      "kind": "drawn",
-      "src": "game/forms/female-healthy/body.png",
-      "note": "완성된 폼",
+      "id": "female",
+      "name": "여성",
+      "note": "임시 기준: 여성 · 건강 볼륨 (라라 기준 폼). 쌔미 맨살(017)이 들어오면 다시 만든다",
+      "types": [
+        {
+          "id": "female-slim",
+          "name": "마른몸",
+          "kind": "preview",
+          "morph": {
+            "limbs": -1,
+            "chest": -1,
+            "hip": -1
+          },
+          "note": "미리보기(기준에서 변형)"
+        },
+        {
+          "id": "female-normal",
+          "name": "노말",
+          "kind": "waiting",
+          "note": "쌔미 맨살 마네킹 대기(GPT 017)"
+        },
+        {
+          "id": "female-healthy",
+          "name": "건강 볼륨",
+          "kind": "drawn",
+          "src": "game/forms/female-healthy/body.png",
+          "note": "완성된 폼",
+          "rig": {
+            "cellSize": 128,
+            "columns": 4,
+            "pivot": [64,118],
+            "poses": {
+              "ready": [[0,0],[470,1]],
+              "hold": [[0,1],[60,2],[130,8],[205,9],[265,3]],
+              "flight": [[0,3],[75,4],[155,10],[215,5],[300,6],[375,11],[415,7],[550,1],[650,0]],
+              "walk": [[0,12],[130,13],[260,14],[390,15]],
+              "fumble": [[0,3],[80,9],[140,8],[220,2],[500,1],[710,0]]
+            },
+            "loopMs": {
+              "ready": 880,
+              "walk": 520
+            },
+            "releaseMs": 215
+          }
+        },
+        {
+          "id": "female-glamour",
+          "name": "글래머",
+          "kind": "preview",
+          "morph": {
+            "limbs": 0,
+            "chest": 3,
+            "hip": 2
+          },
+          "note": "미리보기(기준에서 변형)"
+        }
+      ],
       "rig": {
         "cellSize": 128,
         "columns": 4,
@@ -63,15 +78,35 @@
       }
     },
     {
-      "id": "female-glamour",
-      "name": "글래머",
-      "kind": "preview",
-      "morph": {
-        "limbs": 0,
-        "chest": 3,
-        "hip": 2
-      },
-      "note": "미리보기(기준에서 변형)"
+      "id": "male",
+      "name": "남성",
+      "note": "리오 맨살 마네킹 대기(GPT 021). 들어오면 모든 체형 미리보기가 생긴다",
+      "types": [
+        {
+          "id": "male-slight",
+          "name": "왜소형",
+          "kind": "waiting",
+          "note": "기준 마네킹 대기"
+        },
+        {
+          "id": "male-normal",
+          "name": "노멀",
+          "kind": "waiting",
+          "note": "기준 마네킹 대기"
+        },
+        {
+          "id": "male-medium",
+          "name": "중간",
+          "kind": "waiting",
+          "note": "리오 맨살 마네킹 대기(GPT 021)"
+        },
+        {
+          "id": "male-muscular",
+          "name": "근육형",
+          "kind": "waiting",
+          "note": "기준 마네킹 대기"
+        }
+      ]
     }
   ]
 }

@@ -1,7 +1,7 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드 · 체형 미리보기</title><style>
 *{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:720px;margin:auto;padding:16px}
 h1{font-size:28px;margin:0 0 4px}p{margin:6px 0;color:#d6e4dc}a{color:#ffd28a}
-#note{color:#ffc158;font-weight:600}
+h2{grid-column:1/-1;font-size:20px;margin:14px 0 0}.groupNote{grid-column:1/-1;color:#ffc158;font-weight:600;margin:0}
 .controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 button{font:inherit;border:0;border-radius:10px;padding:8px 12px;background:#fff4d3;color:#142d2e}
 button[aria-pressed=true]{background:#ffc158;font-weight:800}
@@ -14,7 +14,6 @@ figcaption strong{display:block;margin-top:6px}figcaption small{color:#b9cbc3}
 </style><main>
 <h1>체형 미리보기</h1>
 <p>기준 마네킹의 맨살 몸을 계획대로 변형해 그린 미리보기예요. GPT가 그리기 전에 체형 차이를 확인하는 용도라 실제 그림과는 다를 수 있어요. 점선 테두리가 미리보기, 실선이 완성된 그림이에요.</p>
-<p id="note"></p>
 <div class="controls" role="group" aria-label="보기">
   <button data-mode="ready" aria-pressed="true">대기</button>
   <button data-mode="shot" aria-pressed="false">슛</button>
@@ -54,7 +53,7 @@ function draw(now) {
       ctx.fillText('그림 대기', canvas.width / 2, canvas.height / 2);
       continue;
     }
-    if (!image.complete) continue;
+    if (!image.complete || !rig.poses) continue;
     const size = rig.cellSize, cell = frameCell(rig, now);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(image, (cell % rig.columns) * size + CROP[0], Math.floor(cell / rig.columns) * size, CROP[1], size,
@@ -73,7 +72,7 @@ function showSheet() {
     c.width = it.image.width; c.height = it.image.height;
     const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(it.image, 0, 0);
     const cap = document.createElement('figcaption');
-    cap.innerHTML = `<strong>${it.name}</strong><small>${it.note}</small>`;
+    cap.innerHTML = `<strong>${it.sexName} · ${it.name}</strong><small>${it.note}</small>`;
     fig.append(c, cap); box.append(fig);
   }
 }
@@ -86,10 +85,16 @@ document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
 });
 
 const data = await fetch('./body-previews/index.json').then(r => r.json());
-document.getElementById('note').textContent = data.note || '';
 const box = document.getElementById('types');
-for (const t of data.types) {
-  const rig = t.rig || data.rig;
+const FALLBACK_RIG = {cellSize: 128, columns: 4};
+for (const group of data.sexes) {
+ const head = document.createElement('h2');
+ head.textContent = group.name;
+ const note = document.createElement('p');
+ note.className = 'groupNote'; note.textContent = group.note || '';
+ box.append(head, note);
+ for (const t of group.types) {
+  const rig = t.rig || group.rig || FALLBACK_RIG;
   const fig = document.createElement('figure');
   if (t.kind === 'preview') fig.className = 'preview';
   const canvas = document.createElement('canvas');
@@ -100,7 +105,8 @@ for (const t of data.types) {
   const cap = document.createElement('figcaption');
   cap.innerHTML = `<strong>${t.name}</strong><small>${t.note}</small>`;
   fig.append(canvas, cap); box.append(fig);
-  items.push({...t, rig, image, ctx, canvas});
+  items.push({...t, rig, image, ctx, canvas, sexName: group.name});
+ }
 }
 requestAnimationFrame(draw);
 </script>
