@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=8a044bc';
-import {composeOutfit, prefetchParts} from './compose.js?v=8a044bc';
+import {asset} from './version.js?v=4f3956d';
+import {composeOutfit, prefetchParts} from './compose.js?v=4f3956d';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
@@ -78,6 +78,18 @@ export async function outfitArt(spec, costumeId) {
 
 export function prefetchWardrobe(spec) {
   if (spec.composed) prefetchParts(spec.composed, spec.costumes);
+}
+
+// Add "my players" (creator recipes already turned into player data) after the original players.
+// entries: [[id, data]]. Broken ones are skipped like broken player.json files.
+export function addCustomPlayers(roster, entries) {
+  const form = [...roster.values()].find(s => s.composed)?.composed;
+  for (const [id, data] of entries) {
+    const host = [...roster.values()].find(s => s.composed?.id === data.form)?.composed ?? (data.form === form?.id ? form : null);
+    if (!host) continue;
+    try { roster.set(id, resolveFormPlayer(id, data, host)); } catch (error) { console.warn(`custom ${id} skipped:`, error); }
+  }
+  return roster;
 }
 
 export async function loadRoster(base = home, formBase = forms) {

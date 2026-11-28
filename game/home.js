@@ -1,15 +1,16 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=8a044bc';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=4f3956d';
 
-import {stored} from './storage.js?v=8a044bc';
-import {rosterBars} from './stats.js?v=8a044bc';
+import {stored} from './storage.js?v=4f3956d';
+import {rosterBars} from './stats.js?v=4f3956d';
 
 // Jump height and release speed under the stage name, as bars scaled to the roster plus the real numbers.
-function showStats(box, stats) {
+export function showStats(box, stats) {
   if (!box) return;
   box.replaceChildren();
   if (!stats) return;
-  for (const [label, bar, value] of [['점프', stats.jump, stats.jumpCm + 'cm'], ['슛 속도', stats.release, stats.releaseMs + 'ms']]) {
+  for (const [label, bar, value] of [['키', stats.height, stats.heightCm + 'cm'], ['점프', stats.jump, stats.jumpCm + 'cm'],
+    ['슛 속도', stats.release, stats.releaseMs + 'ms']]) {
     const track = document.createElement('span');
     track.setAttribute('aria-hidden', 'true');
     const fill = document.createElement('i');
@@ -62,6 +63,7 @@ export function setupHome({roster, portraits, preview, stageName, stageOutfit, s
   for (const [id, spec] of roster) {
     const card = document.createElement('button');
     card.append(portrait(id), spec.name);
+    if (spec.custom) card.dataset.custom = '';
     card.onclick = () => choose(id, true);
     // Mouse hover previews a player on the stage before choosing (touch taps choose straight away).
     card.onpointerenter = event => { if (event.pointerType === 'mouse' && id !== selected) peek(id); };

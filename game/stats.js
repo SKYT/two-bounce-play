@@ -6,7 +6,8 @@ export function playerStats(spec) {
   if (!jump || !spec.standingPixels || !spec.heightM) return null;
   return {
     jumpCm: Math.round(jump.peakPixels / spec.standingPixels * spec.heightM * 100),
-    releaseMs: spec.releaseMs
+    releaseMs: spec.releaseMs,
+    heightCm: Math.round(spec.heightM * 100)
   };
 }
 
@@ -17,8 +18,8 @@ export function rosterBars(specs) {
     const values = stats.map(([, v]) => v[key]), lo = Math.min(...values), hi = Math.max(...values);
     return v => .3 + .7 * (hi === lo ? 1 : (flip ? hi - v[key] : v[key] - lo) / (hi - lo));
   };
-  const jump = span('jumpCm', false), release = span('releaseMs', true);
-  return Object.fromEntries(stats.map(([id, v]) => [id, {...v, jump: jump(v), release: release(v)}]));
+  const jump = span('jumpCm', false), release = span('releaseMs', true), height = span('heightCm', false);
+  return Object.fromEntries(stats.map(([id, v]) => [id, {...v, jump: jump(v), release: release(v), height: height(v)}]));
 }
 
 // The stage accent: the most common strongly coloured pixel of the outfit (skin and outlines are less saturated).

@@ -13,16 +13,30 @@
     #home { display: grid; gap: 14px; padding: 24px 0 }
     canvas { image-rendering: pixelated; width: 100%; aspect-ratio: 4/5; display: block; border-radius: 16px; margin: 14px 0; touch-action: none }
     button { font: inherit; border: 0; border-radius: 10px; padding: 10px; background: #fff4d3; color: #142d2e }
-    #stage {margin:0;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(#1d4846,#122f30)}
-    #stage canvas {aspect-ratio:240/176;margin:0;border-radius:0}
-    #stage figcaption {position:absolute;left:14px;top:12px;max-width:42%;display:grid;gap:4px;text-shadow:0 2px 0 #0b1f20}
-    #stageName {font-size:24px}
+    #stage,#creatorStage {margin:0;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(#1d4846,#122f30)}
+    #stage canvas,#creatorStage canvas {aspect-ratio:240/176;margin:0;border-radius:0}
+    #stage figcaption,#creatorStage figcaption {position:absolute;left:14px;top:12px;max-width:42%;display:grid;gap:4px;text-shadow:0 2px 0 #0b1f20}
+    #stageName,#creatorName {font-size:24px}
     #stageOutfit {font-size:13px;color:#d8e8d0}
-    #stage {background:radial-gradient(circle at 58% 70%,rgb(var(--accent,255 193 88)/.22),transparent 62%),linear-gradient(#1d4846,#122f30);transition:background .4s}
-    #stageStats {display:grid;grid-template-columns:auto 64px auto;gap:3px 6px;align-items:center;font-size:12px;margin-top:4px;color:#e8f0dc}
-    #stageStats span[aria-hidden] {height:6px;border-radius:3px;background:#0b2324;overflow:hidden}
-    #stageStats i {display:block;height:100%;background:#ffc158;border-radius:3px;transition:width .3s}
-    #stageStats b {font-weight:600;font-size:11px;color:#c9d8c4}
+    #stage,#creatorStage {background:radial-gradient(circle at 58% 70%,rgb(var(--accent,255 193 88)/.22),transparent 62%),linear-gradient(#1d4846,#122f30);transition:background .4s}
+    #roster button[data-custom]::before {content:"★";color:#ffc158;font-size:12px}
+    #customTools {display:flex;gap:6px}
+    #customTools button,#creator .row button,#newPlayer {flex:1;background:#193c3b;color:#fff4d3;min-height:44px}
+    #creator {display:grid;gap:12px;padding:16px 0}
+    #creator h2 {margin:0;font-size:22px}
+    #creatorFields {display:grid;gap:10px}
+    #creatorFields fieldset {border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}
+    #creatorFields legend {font-size:14px;margin-bottom:4px}
+    #creatorFields button {flex:1 1 30%;background:#193c3b;color:#fff4d3;border:2px solid transparent;min-height:44px;padding:8px}
+    #creatorFields button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
+    #creator label {display:grid;gap:4px;font-size:14px}
+    #creator input {font:inherit;padding:10px;border-radius:10px;border:0;background:#fff4d3;color:#142d2e}
+    #creator .row {display:flex;gap:8px}
+    #creator .row .primary,#customTools .primary {background:#ffc158;color:#142d2e;font-weight:700}
+    #stageStats,#creatorStats {display:grid;grid-template-columns:auto 64px auto;gap:3px 6px;align-items:center;font-size:12px;margin-top:4px;color:#e8f0dc}
+    #stageStats span[aria-hidden],#creatorStats span[aria-hidden] {height:6px;border-radius:3px;background:#0b2324;overflow:hidden}
+    #stageStats i,#creatorStats i {display:block;height:100%;background:#ffc158;border-radius:3px;transition:width .3s}
+    #stageStats b,#creatorStats b {font-weight:600;font-size:11px;color:#c9d8c4}
     #roster {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     #roster button {display:flex;align-items:center;justify-content:center;gap:4px;flex:1;background:#193c3b;color:#fff4d3;border:2px solid transparent;font-weight:700}
     #roster button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
@@ -55,10 +69,24 @@
         <figcaption><strong id="stageName"></strong><span id="stageOutfit"></span><div id="stageStats"></div></figcaption>
       </figure>
       <div id="roster" role="group" aria-label="선수 선택"></div>
+      <div id="customTools" hidden><button id="editPlayer" type="button">고치기</button><button id="sharePlayer" type="button">링크 복사</button><button id="deletePlayer" type="button">삭제</button></div>
+      <button id="newPlayer" type="button" disabled>새 선수 만들기</button>
+      <p id="customNote" aria-live="polite"></p>
       <div id="costumes" role="group" aria-label="의상 선택" hidden></div>
       <p id="costumeName" aria-live="polite"></p>
       <strong id="homeRecord"></strong>
       <button id="play" class="primary" disabled>선수 불러오는 중</button>
+    </section>
+    <section id="creator" hidden aria-labelledby="creatorTitle">
+      <h2 id="creatorTitle">새 선수 만들기</h2>
+      <figure id="creatorStage">
+        <canvas id="creatorPreview" width="240" height="176" aria-hidden="true"></canvas>
+        <figcaption><strong id="creatorName"></strong><div id="creatorStats"></div></figcaption>
+      </figure>
+      <label>이름 (8자까지)<input id="creatorNameInput" maxlength="8" autocomplete="off"></label>
+      <div id="creatorFields"></div>
+      <p id="creatorNote" aria-live="polite"></p>
+      <div class="row"><button id="creatorRandom" type="button">랜덤</button><button id="creatorCancel" type="button">취소</button><button id="creatorSave" type="button" class="primary">저장</button></div>
     </section>
     <section id="court" hidden>
       <strong id="score"></strong><p id="missCount"></p><p id="records"></p>
@@ -69,6 +97,6 @@
       <footer><button id="leave">게임 종료 후 홈으로</button></footer>
     </section>
   </main>
-  <script type="module" src="./game/main.js?v=8a044bc"></script>
+  <script type="module" src="./game/main.js?v=4f3956d"></script>
 </body>
 </html>

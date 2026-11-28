@@ -1,9 +1,9 @@
 // Character-select stage: the chosen player, large, idling with the ball and showing their jump shot every few
 // seconds. Switching players plays a short walk-in. It reuses the game's own sprite code, so a new player or
 // outfit appears here with no extra data. Reduced motion shows a still ready pose.
-import {loadPlayer} from './player-renderer.js?v=8a044bc';
-import {createBallSprite} from './art/ball.js?v=8a044bc';
-import {accentOf} from './stats.js?v=8a044bc';
+import {loadPlayer} from './player-renderer.js?v=4f3956d';
+import {createBallSprite} from './art/ball.js?v=4f3956d';
+import {accentOf} from './stats.js?v=4f3956d';
 
 // Room above the head for the highest jumper (35 dots) plus the released ball.
 const W = 240, H = 176, FLOOR = 158, CENTER = 140;
@@ -35,8 +35,10 @@ export function createPreview(canvas, ballStyle) {
 
   // The demo timeline: walk in → idle → set → jump shot → idle → set → …
   function beat(t) {
-    if (!spec.loopMs?.walk) t += WALK_MS;   // players without a walk cycle (older sheets) start in place
-    if (t < WALK_MS) return {state: 'walk', ms: t * spec.loopMs.walk / WALK_MS, x: -24 * (1 - t / WALK_MS)};
+    t = Math.max(0, t);   // a frame stamped just before a switch would give a negative time
+    const walks = Boolean(spec.loopMs?.walk && spec.poses?.walk);
+    if (!walks) t += WALK_MS;   // players without a walk cycle (older sheets) start in place
+    if (walks && t < WALK_MS) return {state: 'walk', ms: t * spec.loopMs.walk / WALK_MS, x: -24 * (1 - t / WALK_MS)};
     const flightMs = spec.poses.flight.at(-1)[0] + 120;
     const cycle = IDLE_MS + HOLD_MS + flightMs, u = (t - WALK_MS) % cycle;
     if (u < IDLE_MS) return {state: 'ready', ms: u};

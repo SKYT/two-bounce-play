@@ -4,7 +4,8 @@
 const KEYS = {
   best: 'two-bounce:best:.45',                 // best streak (".45": the band width when records started)
   player: 'two-bounce:player',                 // last chosen player id
-  costume: id => 'two-bounce:costume:' + id    // last outfit per player
+  costume: id => 'two-bounce:costume:' + id,   // last outfit per player
+  customs: 'two-bounce:custom'                  // "my players" made in the creator: [{id, ...recipe}]
 };
 
 function read(key) {
@@ -20,5 +21,9 @@ export const stored = {
   player: () => read(KEYS.player),
   setPlayer: id => write(KEYS.player, id),
   costume: id => read(KEYS.costume(id)),
-  setCostume: (id, costume) => write(KEYS.costume(id), costume)
+  setCostume: (id, costume) => write(KEYS.costume(id), costume),
+  customs: () => {
+    try { const list = JSON.parse(read(KEYS.customs) || '[]'); return Array.isArray(list) ? list : []; } catch { return []; }
+  },
+  setCustoms: list => write(KEYS.customs, JSON.stringify(list))
 };

@@ -1,11 +1,13 @@
-import {scene as baseScene, rules} from './defaults.js?v=8a044bc';
-import {loadRoster, loadPortraits} from './players.js?v=8a044bc';
-import {setupHome} from './home.js?v=8a044bc';
-import {stored} from './storage.js?v=8a044bc';
-import {createPreview} from './preview.js?v=8a044bc';
-import {createRenderer} from './render.js?v=8a044bc';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=8a044bc';
-import {enableAudio, tone, swish} from './audio.js?v=8a044bc';
+import {scene as baseScene, rules} from './defaults.js?v=4f3956d';
+import {loadRoster, loadPortraits, addCustomPlayers} from './players.js?v=4f3956d';
+import {formsOf, validRecipe, recipeData, decodeRecipe, encodeRecipe, MAX_CUSTOM} from './custom.js?v=4f3956d';
+import {setupCreator} from './creator.js?v=4f3956d';
+import {setupHome} from './home.js?v=4f3956d';
+import {stored} from './storage.js?v=4f3956d';
+import {createPreview} from './preview.js?v=4f3956d';
+import {createRenderer} from './render.js?v=4f3956d';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=4f3956d';
+import {enableAudio, tone, swish} from './audio.js?v=4f3956d';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');
@@ -159,9 +161,60 @@ async function selectPlayer(player, retryChoice) {
 play.disabled = true;
 play.textContent = '선수 목록 불러오는 중';
 const preview = createPreview(el('preview'), baseScene.ball);
-Promise.all([loadRoster(), loadPortraits()]).then(([roster, portraits]) => setupHome({roster, portraits, preview, stageName:el('stageName'), stageOutfit:el('stageOutfit'), stageStats:el('stageStats'), cardsBox:el('roster'), costumesBox:el('costumes'),
-  costumeName:el('costumeName'), query:new URLSearchParams(location.search), onChoose:selectPlayer}))
-  .catch(() => {
+const query = new URLSearchParams(location.search);
+
+// "My players": saved creator recipes join the roster; a selected one gets edit / share / delete.
+function setupCustom(roster) {
+  const forms = formsOf(roster);
+  const saved = stored.customs().filter(r => validRecipe(r, forms));
+  addCustomPlayers(roster, saved.map(r => [r.id, recipeData(r, forms)]));
+  const creatorSection = el('creator');
+  const creator = setupCreator({roster, ballStyle: baseScene.ball,
+    els: {stage: el('creatorPreview'), fields: el('creatorFields'), name: el('creatorName'), stats: el('creatorStats'),
+      nameInput: el('creatorNameInput'), random: el('creatorRandom'), cancel: el('creatorCancel'), save: el('creatorSave'),
+      note: el('creatorNote'), title: el('creatorTitle')},
+    onDone: id => location.assign(location.pathname + '?player=' + encodeURIComponent(id)),
+    onClose: () => { creatorSection.hidden = true; home.hidden = false; preview.resume(); el('newPlayer').focus(); }});
+  const openCreator = recipe => {
+    if (!creator.open(recipe)) return;
+    home.hidden = true; creatorSection.hidden = false; preview.pause();
+    el('creatorNameInput').focus();
+  };
+  const newPlayer = /** @type {HTMLButtonElement} */ (el('newPlayer'));
+  newPlayer.disabled = !forms.size || saved.length >= MAX_CUSTOM;
+  newPlayer.textContent = saved.length >= MAX_CUSTOM ? `내 선수 ${MAX_CUSTOM}명이 가득 찼어요` : '새 선수 만들기';
+  newPlayer.onclick = () => openCreator(null);
+  let armed = null;
+  const tools = (id) => {
+    const recipe = saved.find(r => r.id === id);
+    el('customTools').hidden = !recipe;
+    el('customNote').textContent = '';
+    if (!recipe) return;
+    el('editPlayer').onclick = () => openCreator(recipe);
+    el('sharePlayer').onclick = async () => {
+      const link = location.origin + location.pathname + '?recipe=' + encodeRecipe(recipe);
+      try { await navigator.clipboard.writeText(link); el('customNote').textContent = '링크를 복사했어요'; }
+      catch { el('customNote').textContent = link; }
+    };
+    const remove = el('deletePlayer');
+    remove.textContent = '삭제';
+    remove.onclick = () => {
+      if (armed !== id) { armed = id; remove.textContent = '한 번 더 누르면 삭제'; return; }
+      stored.setCustoms(stored.customs().filter(r => r.id !== id));
+      location.assign(location.pathname);
+    };
+  };
+  // a shared link opens the creator with that player (saved only if the visitor presses 저장)
+  const shared = query.get('recipe') && decodeRecipe(query.get('recipe'));
+  if (shared) setTimeout(() => openCreator(shared), 0);
+  return tools;
+}
+
+Promise.all([loadRoster(), loadPortraits()]).then(([roster, portraits]) => {
+  const tools = setupCustom(roster);
+  setupHome({roster, portraits, preview, stageName:el('stageName'), stageOutfit:el('stageOutfit'), stageStats:el('stageStats'), cardsBox:el('roster'), costumesBox:el('costumes'),
+    costumeName:el('costumeName'), query, onChoose:(player, retryChoice) => { tools(player?.id); return selectPlayer(player, retryChoice); }});
+}).catch(() => {
     play.textContent = '선수 목록을 불러오지 못했어요 · 새로고침';
     play.disabled = false;
     play.onclick = () => location.reload();
