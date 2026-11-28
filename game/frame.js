@@ -1,7 +1,7 @@
 // Where everything is on one frame, as plain data: camera, player pose, ball, shadows, effects.
 // render.js only draws what this returns, so the rules of motion can be tested in Node and a different
 // renderer (PixiJS, a replay exporter) can reuse them unchanged.
-import {makeProjection} from './projection.js?v=40555d0';
+import {makeProjection} from './projection.js?v=052e1ca';
 
 export const COURT_SIZE = {width: 400, height: 500};
 const mix = (a,b,t) => a + (b-a)*t;

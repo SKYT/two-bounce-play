@@ -19,17 +19,20 @@
     "cherry": {
       "name": "체리 탱크톱",
       "sheet": "cherry.png",
-      "motionMask": "motion/cherry.png"
+      "motionMask": "motion/cherry.png",
+      "tucked": true
     },
     "mint": {
       "name": "네이비 민트 크롭티",
       "sheet": "mint.png",
-      "motionMask": "motion/mint.png"
+      "motionMask": "motion/mint.png",
+      "tucked": true
     },
     "crimson": {
       "name": "진홍 크롭탑",
       "sheet": "crimson.png",
-      "motionMask": "motion/crimson.png"
+      "motionMask": "motion/crimson.png",
+      "tucked": true
     }
   },
   "bottoms": {
@@ -50,7 +53,15 @@
     "top": "cover/top.png",
     "bottom": "cover/bottom.png",
     "accessory": "cover/accessory.png",
+    "hair": "cover/hair.png",
     "arms": "cover/arms.png",
-    "armsFrom": "bottom:graphite"
+    "from": "part-map.png"
+  },
+  "layers": {
+    "front": "layers/front.png",
+    "arms": {
+      "ballArm": "FFFFFFFBFBFBFFBF",
+      "guideArm": "FFFBBFFFBFFFFBFF"
+    }
   }
 }

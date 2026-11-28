@@ -1,5 +1,7 @@
-// Mix-and-match outfits are assembled in the game from a shared form (game/forms/<form>/):
-// body → top patch → bottom patch → high-density head, plus the takeoff/landing secondary-motion frames.
+// Mix-and-match outfits are assembled in the game from a shared form (game/forms/<form>/) in layer order
+// (docs/part-map.md): body → bottom → top (a tucked top or an over-top bottom swaps those two) → front arms
+// (the body's arm pixels come back over the clothes; only a top may stay on them, as a sleeve) → high-density head
+// (never over a front arm), plus the takeoff/landing secondary-motion frames.
 // The pure functions work on {width, height, data} RGBA images so Node tests can compare them with
 // scripts/compose-mannequin.py pixel for pixel. Only composeOutfit() touches the DOM.
 
@@ -15,6 +17,16 @@ export function applyPatch(base, part) {
   return {width: base.width, height: base.height, data: out};
 }
 
+// Front arms come back over the clothes: a pixel in `front` shows the body, unless the top paints it (a sleeve).
+export function restoreFront(dressed, body, top, front) {
+  const out = new Uint8ClampedArray(dressed.data);
+  for (let i = 0; i < out.length; i += 4) {
+    if (!isSet(front, i) || top.data[i + 3] === 255) continue;
+    out[i] = body.data[i]; out[i + 1] = body.data[i + 1]; out[i + 2] = body.data[i + 2]; out[i + 3] = body.data[i + 3];
+  }
+  return {width: dressed.width, height: dressed.height, data: out};
+}
+
 export function upscale(image, k) {
   const width = image.width * k, height = image.height * k, out = new Uint8ClampedArray(width * height * 4);
   for (let y = 0; y < height; y++) {
@@ -27,13 +39,15 @@ export function upscale(image, k) {
   return {width, height, data: out};
 }
 
-// Copy `detail` into `target` wherever `mask` is set; boxes map a source cell to a target cell.
-function pasteMasked(target, detail, mask, from = [0, 0, detail.width, detail.height], to = [0, 0]) {
+// Copy `detail` into `target` wherever `mask` is set and `front` (1x, `scale` smaller) is not;
+// boxes map a source cell to a target cell.
+function pasteMasked(target, detail, mask, from = [0, 0, detail.width, detail.height], to = [0, 0], front = null, scale = 1) {
   const [sx, sy, w, h] = from, [tx, ty] = to;
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const s = ((sy + y) * detail.width + sx + x) * 4;
       if (!isSet(mask, s)) continue;
+      if (front && isSet(front, (Math.floor((sy + y) / scale) * front.width + Math.floor((sx + x) / scale)) * 4)) continue;
       const d = ((ty + y) * target.width + tx + x) * 4;
       target.data[d] = detail.data[s]; target.data[d + 1] = detail.data[s + 1];
       target.data[d + 2] = detail.data[s + 2]; target.data[d + 3] = detail.data[s + 3];
@@ -43,14 +57,14 @@ function pasteMasked(target, detail, mask, from = [0, 0, detail.width, detail.he
 // Masks are 1-bit PNGs: a set pixel is white (and opaque, if the decoder adds alpha).
 const isSet = (mask, i) => mask.data[i] > 0;
 
-export function addHead(sheet, head, scale, cells, cellSize, columns) {
+export function addHead(sheet, head, scale, cells, cellSize, columns, front = null) {
   const out = upscale(sheet, scale);
-  if (!cells) { pasteMasked(out, head.image, head.mask); return out; }
+  if (!cells) { pasteMasked(out, head.image, head.mask, undefined, undefined, front, scale); return out; }
   const size = cellSize * scale;
   cells.forEach((cell, index) => {
     pasteMasked(out, head.image, head.mask,
       [cell % columns * size, Math.floor(cell / columns) * size, size, size],
-      [index % columns * size, Math.floor(index / columns) * size]);
+      [index % columns * size, Math.floor(index / columns) * size], front, scale);
   });
   return out;
 }
@@ -86,16 +100,21 @@ export function bakeMotion(outfit, mask, motion, amplitude, size, columns) {
 // form: parsed form.json with images already decoded. outfit: {top, bottom, head}.
 export function buildOutfit(form, outfit) {
   const {rig, images} = form;
-  const uniform = applyPatch(applyPatch(images.body, images.tops[outfit.top]), images.bottoms[outfit.bottom]);
+  const top = images.tops[outfit.top], bottom = images.bottoms[outfit.bottom];
+  // default: a top is worn over the bottom; a tucked top or an over-top bottom (long skirt, dress) swaps them
+  const bottomOver = form.tops[outfit.top]?.tucked || form.bottoms[outfit.bottom]?.layer === 'over-top';
+  let uniform = bottomOver ? applyPatch(applyPatch(images.body, top), bottom) : applyPatch(applyPatch(images.body, bottom), top);
+  const front = images.front || null;
+  if (front) uniform = restoreFront(uniform, images.body, top, front);
   const head = form.heads?.[outfit.head ?? form.defaultHead] && {image: images.heads[outfit.head ?? form.defaultHead],
     mask: images.headMasks[outfit.head ?? form.defaultHead]};
   const scale = head ? form.detailScale : 1;
-  const sheet = head ? addHead(uniform, head, scale) : uniform;
+  const sheet = head ? addHead(uniform, head, scale, undefined, undefined, undefined, front) : uniform;
   let motion = null;
   const amplitude = form.motion?.tops?.[outfit.top];
   if (amplitude && images.motionMasks[outfit.top]) {
     const strip = bakeMotion(uniform, images.motionMasks[outfit.top], form.motion, amplitude, rig.cellSize, rig.columns);
-    motion = head ? addHead(strip, head, scale, form.motion.frames.map(f => f[0]), rig.cellSize, rig.columns) : strip;
+    motion = head ? addHead(strip, head, scale, form.motion.frames.map(f => f[0]), rig.cellSize, rig.columns, front) : strip;
   }
   return {sheet, motion, cellSize: rig.cellSize * scale};
 }
@@ -130,10 +149,11 @@ const decodeOnce = url => {
 async function partsFor(form, outfit) {
   const head = outfit.head ?? form.defaultHead, {urls} = form;
   const one = async (map, id) => (map[id] ? {[id]: await decodeOnce(map[id])} : {});
-  const [body, tops, bottoms, heads, headMasks, motionMasks] = await Promise.all([
+  const [body, tops, bottoms, heads, headMasks, motionMasks, front] = await Promise.all([
     decodeOnce(urls.body), one(urls.tops, outfit.top), one(urls.bottoms, outfit.bottom),
-    one(urls.heads, head), one(urls.headMasks, head), one(urls.motionMasks, outfit.top)]);
-  return {...form, images: {body, tops, bottoms, heads, headMasks, motionMasks}};
+    one(urls.heads, head), one(urls.headMasks, head), one(urls.motionMasks, outfit.top),
+    urls.front ? decodeOnce(urls.front) : null]);
+  return {...form, images: {body, tops, bottoms, heads, headMasks, motionMasks, front}};
 }
 
 // After a form player is shown, fetch the rest of their wardrobe in the background so switching is instant.

@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=40555d0';
-import {composeOutfit, prefetchParts} from './compose.js?v=40555d0';
+import {asset} from './version.js?v=052e1ca';
+import {composeOutfit, prefetchParts} from './compose.js?v=052e1ca';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
@@ -33,7 +33,8 @@ async function loadForm(name, base) {
   const dir = new URL(name + '/', base);
   const [form, rig, motion] = await Promise.all(['form.json', 'rig.json', 'motion.json']
     .map(file => readJson(asset(file, dir)).catch(() => null)));
-  const urls = {body: asset(form.body, dir), tops: {}, bottoms: {}, heads: {}, headMasks: {}, motionMasks: {}};
+  const urls = {body: asset(form.body, dir), tops: {}, bottoms: {}, heads: {}, headMasks: {}, motionMasks: {},
+    front: form.layers?.front ? asset(form.layers.front, dir) : null};
   for (const [id, part] of Object.entries(form.tops)) {
     urls.tops[id] = asset(part.sheet, dir);
     if (part.motionMask) urls.motionMasks[id] = asset(part.motionMask, dir);
