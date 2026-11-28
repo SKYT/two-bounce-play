@@ -18,6 +18,11 @@
     #stage figcaption {position:absolute;left:14px;top:12px;max-width:42%;display:grid;gap:4px;text-shadow:0 2px 0 #0b1f20}
     #stageName {font-size:24px}
     #stageOutfit {font-size:13px;color:#d8e8d0}
+    #stage {background:radial-gradient(circle at 58% 70%,rgb(var(--accent,255 193 88)/.22),transparent 62%),linear-gradient(#1d4846,#122f30);transition:background .4s}
+    #stageStats {display:grid;grid-template-columns:auto 64px auto;gap:3px 6px;align-items:center;font-size:12px;margin-top:4px;color:#e8f0dc}
+    #stageStats span[aria-hidden] {height:6px;border-radius:3px;background:#0b2324;overflow:hidden}
+    #stageStats i {display:block;height:100%;background:#ffc158;border-radius:3px;transition:width .3s}
+    #stageStats b {font-weight:600;font-size:11px;color:#c9d8c4}
     #roster {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     #roster button {display:flex;align-items:center;justify-content:center;gap:4px;flex:1;background:#193c3b;color:#fff4d3;border:2px solid transparent;font-weight:700}
     #roster button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
@@ -47,7 +52,7 @@
     <section id="home">
       <figure id="stage">
         <canvas id="preview" width="240" height="176" aria-hidden="true"></canvas>
-        <figcaption><strong id="stageName"></strong><span id="stageOutfit"></span></figcaption>
+        <figcaption><strong id="stageName"></strong><span id="stageOutfit"></span><div id="stageStats"></div></figcaption>
       </figure>
       <div id="roster" role="group" aria-label="선수 선택"></div>
       <div id="costumes" role="group" aria-label="의상 선택" hidden></div>
@@ -64,6 +69,6 @@
       <footer><button id="leave">게임 종료 후 홈으로</button></footer>
     </section>
   </main>
-  <script type="module" src="./game/main.js?v=c3f7d9e"></script>
+  <script type="module" src="./game/main.js?v=8a044bc"></script>
 </body>
 </html>

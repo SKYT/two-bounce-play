@@ -1,7 +1,25 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=c3f7d9e';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=8a044bc';
 
-import {stored} from './storage.js?v=c3f7d9e';
+import {stored} from './storage.js?v=8a044bc';
+import {rosterBars} from './stats.js?v=8a044bc';
+
+// Jump height and release speed under the stage name, as bars scaled to the roster plus the real numbers.
+function showStats(box, stats) {
+  if (!box) return;
+  box.replaceChildren();
+  if (!stats) return;
+  for (const [label, bar, value] of [['점프', stats.jump, stats.jumpCm + 'cm'], ['슛 속도', stats.release, stats.releaseMs + 'ms']]) {
+    const track = document.createElement('span');
+    track.setAttribute('aria-hidden', 'true');
+    const fill = document.createElement('i');
+    fill.style.width = Math.round(bar * 100) + '%';
+    track.append(fill);
+    const name = document.createElement('span'), number = document.createElement('b');
+    name.textContent = label; number.textContent = value;
+    box.append(name, track, number);
+  }
+}
 
 // A portrait comes from the published portrait sheet when it exists, otherwise from the player's own sheet
 // (url may be a promise: composed outfits are built in the browser first).
@@ -31,7 +49,9 @@ function portraitFromAtlas(spec, url) {
 
 // onChoose(id, costumeId, spec) runs for every choice; it returns a promise that settles when the player is ready.
 // remember() stores the choice once the player has loaded.
-export function setupHome({roster, portraits, preview, stageName, stageOutfit, cardsBox, costumesBox, costumeName, query, onChoose}) {
+export function setupHome({roster, portraits, preview, stageName, stageOutfit, stageStats, cardsBox, costumesBox, costumeName, query, onChoose}) {
+  const bars = rosterBars([...roster.values()]);
+  let selected = null;   // the chosen player; a hovered card previews another one until the pointer leaves
   const portrait = (id, costumeId) => {
     const spec = roster.get(id), costume = costumeId ?? costumesOf(spec)[0].id;
     return portraitFromSheet(portraits, costume === 'base' ? id : id + '/' + costume) ||
@@ -43,6 +63,9 @@ export function setupHome({roster, portraits, preview, stageName, stageOutfit, c
     const card = document.createElement('button');
     card.append(portrait(id), spec.name);
     card.onclick = () => choose(id, true);
+    // Mouse hover previews a player on the stage before choosing (touch taps choose straight away).
+    card.onpointerenter = event => { if (event.pointerType === 'mouse' && id !== selected) peek(id); };
+    card.onpointerleave = event => { if (event.pointerType === 'mouse' && id !== selected) peek(selected); };
     cards.set(id, card);
     cardsBox.append(card);
   }
@@ -87,8 +110,24 @@ export function setupHome({roster, portraits, preview, stageName, stageOutfit, c
     }
   }
 
+  let peeking = 0;
+  async function peek(id) {
+    if (!preview || !id) return;
+    const turn = ++peeking, base = roster.get(id);
+    const costume = initialCostume(base, null, stored.costume(id));
+    let art;
+    try { art = await outfitArt(base, costume); } catch { return; }
+    if (turn !== peeking) return;
+    stageName.textContent = base.name;
+    stageOutfit.textContent = costumesOf(base).length > 1 ? costumesOf(base).find(c => c.id === costume).name : '';
+    if (stageStats) showStats(stageStats, bars[id]);
+    preview.show({...base, ...art}).catch(() => {});
+  }
+
   let latest = 0;
   async function choose(id, remember, costumeId) {
+    selected = id;
+    peeking++;   // a choice wins over a pending hover preview
     const turn = ++latest;
     const base = roster.get(id);
     // An explicit click picks from storage; the first load may follow ?costume=.
@@ -104,6 +143,7 @@ export function setupHome({roster, portraits, preview, stageName, stageOutfit, c
       const outfit = costumesOf(base).find(c => c.id === costume);
       stageName.textContent = base.name;
       stageOutfit.textContent = costumesOf(base).length > 1 ? outfit.name : '';
+      if (stageStats) showStats(stageStats, bars[id]);
       preview.show({...base, ...art}).catch(() => {});
     }
     const ready = await onChoose({...base, ...art}, retry);

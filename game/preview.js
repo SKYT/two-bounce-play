@@ -1,8 +1,9 @@
 // Character-select stage: the chosen player, large, idling with the ball and showing their jump shot every few
 // seconds. Switching players plays a short walk-in. It reuses the game's own sprite code, so a new player or
 // outfit appears here with no extra data. Reduced motion shows a still ready pose.
-import {loadPlayer} from './player-renderer.js?v=c3f7d9e';
-import {createBallSprite} from './art/ball.js?v=c3f7d9e';
+import {loadPlayer} from './player-renderer.js?v=8a044bc';
+import {createBallSprite} from './art/ball.js?v=8a044bc';
+import {accentOf} from './stats.js?v=8a044bc';
 
 // Room above the head for the highest jumper (35 dots) plus the released ball.
 const W = 240, H = 176, FLOOR = 158, CENTER = 140;
@@ -13,6 +14,18 @@ export function createPreview(canvas, ballStyle) {
   const ball = createBallSprite(ballStyle);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let actor = null, spec = null, since = 0, frame = 0, running = true, token = 0;
+  let accent = [255, 214, 120];
+
+  // The outfit's own colour tints the spotlight and the stage behind the caption (figure's --accent).
+  function pickAccent() {
+    const probe = document.createElement('canvas');
+    probe.width = W; probe.height = H;
+    const c = probe.getContext('2d', {willReadFrequently: true});
+    actor.draw(c, {x: CENTER, y: FLOOR}, 1, 1, actor.pose('ready', 0));
+    const found = accentOf(c.getImageData(0, 0, W, H).data);
+    accent = found || [255, 214, 120];
+    canvas.parentElement?.style.setProperty('--accent', accent.join(' '));
+  }
 
   function resize() {
     const res = Math.max(1, Math.min(4, Math.ceil(canvas.clientWidth * (devicePixelRatio || 1) / W)));
@@ -22,6 +35,7 @@ export function createPreview(canvas, ballStyle) {
 
   // The demo timeline: walk in → idle → set → jump shot → idle → set → …
   function beat(t) {
+    if (!spec.loopMs?.walk) t += WALK_MS;   // players without a walk cycle (older sheets) start in place
     if (t < WALK_MS) return {state: 'walk', ms: t * spec.loopMs.walk / WALK_MS, x: -24 * (1 - t / WALK_MS)};
     const flightMs = spec.poses.flight.at(-1)[0] + 120;
     const cycle = IDLE_MS + HOLD_MS + flightMs, u = (t - WALK_MS) % cycle;
@@ -38,8 +52,8 @@ export function createPreview(canvas, ballStyle) {
     if (spec?.hand === 'left') ctx.transform(-1, 0, 0, 1, W, 0);   // left-handers: the whole stage mirrored
     // spotlight and floor
     const light = ctx.createRadialGradient(CENTER, FLOOR - 44, 8, CENTER, FLOOR - 44, 115);
-    light.addColorStop(0, 'rgba(255,214,120,.30)');
-    light.addColorStop(1, 'rgba(255,214,120,0)');
+    light.addColorStop(0, `rgba(${accent.join(',')},.30)`);
+    light.addColorStop(1, `rgba(${accent.join(',')},0)`);
     ctx.fillStyle = light;
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = 'rgba(255,244,211,.10)';
@@ -92,6 +106,7 @@ export function createPreview(canvas, ballStyle) {
       if (mine !== token) return;
       const sameBody = spec && spec.id === next.id;
       actor = loaded; spec = next;
+      try { pickAccent(); } catch { /* a tainted or missing sheet keeps the last accent */ }
       since = performance.now() - (sameBody ? WALK_MS : 0); // an outfit change skips the walk-in
       draw(performance.now());
       kick();
