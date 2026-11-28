@@ -1,9 +1,9 @@
-import {scene as baseScene, rules} from './defaults.js?v=0cfd164';
-import {loadRoster} from './players.js?v=0cfd164';
-import {setupHome} from './home.js?v=0cfd164';
-import {createRenderer} from './render.js?v=0cfd164';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=0cfd164';
-import {enableAudio, tone, swish} from './audio.js?v=0cfd164';
+import {scene as baseScene, rules} from './defaults.js?v=9dbeb07';
+import {loadRoster} from './players.js?v=9dbeb07';
+import {setupHome} from './home.js?v=9dbeb07';
+import {createRenderer} from './render.js?v=9dbeb07';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=9dbeb07';
+import {enableAudio, tone, swish} from './audio.js?v=9dbeb07';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');
@@ -122,6 +122,13 @@ showRecord();
 retry.onclick = startGame;
 // A slower atlas download must never replace the player's most recent choice.
 async function selectPlayer(player, retryChoice) {
+  if (!player) { // the outfit could not be built
+    scene = {...baseScene};
+    play.textContent = '선수 다시 불러오기';
+    play.onclick = retryChoice;
+    play.disabled = false;
+    return false;
+  }
   const selected = {...baseScene, player};
   scene = selected;
   play.disabled = true;

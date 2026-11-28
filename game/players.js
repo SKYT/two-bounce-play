@@ -1,8 +1,10 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=0cfd164';
+import {asset} from './version.js?v=9dbeb07';
+import {composeOutfit} from './compose.js?v=9dbeb07';
 
 const home = new URL('./players/', import.meta.url);
+const forms = new URL('./forms/', import.meta.url);
 
 async function readJson(url) {
   if (url.protocol === 'file:') { // Node tests read straight from disk
@@ -25,10 +27,63 @@ export function resolvePlayer(id, data, base = new URL(id + '/', home)) {
   return spec;
 }
 
-export async function loadRoster(base = home) {
+// A form is a shared body with interchangeable parts (game/forms/<form>/). A player that names a form
+// takes its rig (cells, hands, timing) from the form and picks tops, bottoms and a head from it.
+async function loadForm(name, base) {
+  const dir = new URL(name + '/', base);
+  const [form, rig, motion] = await Promise.all(['form.json', 'rig.json', 'motion.json']
+    .map(file => readJson(asset(file, dir)).catch(() => null)));
+  const urls = {body: asset(form.body, dir), tops: {}, bottoms: {}, heads: {}, headMasks: {}, motionMasks: {}};
+  for (const [id, part] of Object.entries(form.tops)) {
+    urls.tops[id] = asset(part.sheet, dir);
+    if (part.motionMask) urls.motionMasks[id] = asset(part.motionMask, dir);
+  }
+  for (const [id, part] of Object.entries(form.bottoms)) urls.bottoms[id] = asset(part.sheet, dir);
+  for (const [id, head] of Object.entries(form.heads || {})) {
+    urls.heads[id] = asset(head.sheet, dir);
+    urls.headMasks[id] = asset(head.mask, dir);
+  }
+  return {...form, id: name, base: dir, rig, motion, urls};
+}
+
+export function resolveFormPlayer(id, data, form) {
+  const head = data.head ?? form.defaultHead;
+  const scale = form.heads?.[head] ? form.detailScale : 1;
+  const wardrobe = {top: {}, bottom: {}};
+  for (const slot of ['top', 'bottom']) {
+    for (const part of data.wardrobe[slot]) {
+      const known = form[slot + 's'][part];
+      if (!known) throw new Error(`${id}: ${form.id} has no ${slot} "${part}"`);
+      wardrobe[slot][part] = known.name;
+    }
+  }
+  const costumes = [];
+  for (const top of data.wardrobe.top) for (const bottom of data.wardrobe.bottom) {
+    costumes.push({id: top + '-' + bottom, name: wardrobe.top[top] + ' · ' + wardrobe.bottom[bottom], top, bottom, head});
+  }
+  return {...form.rig, ...data, id, wardrobe, costumes, atlas: null,
+    cellSize: form.rig.cellSize * scale, flightMotion: form.motion?.flight, composed: form};
+}
+
+// Pixels for one outfit: composed players are built in the browser, the rest point at their sheet files.
+export async function outfitArt(spec, costumeId) {
+  const costume = costumesOf(spec).find(c => c.id === costumeId) || costumesOf(spec)[0];
+  if (spec.composed) {
+    const art = await composeOutfit(spec.composed, costume);
+    return {url: art.url, atlasImage: art.sheet, motionImage: art.motion, atlas: null, motionAtlas: null};
+  }
+  return {url: costume.atlas.href, atlas: costume.atlas, motionAtlas: costume.motionAtlas ?? spec.motionAtlas ?? null};
+}
+
+export async function loadRoster(base = home, formBase = forms) {
   const index = await readJson(asset('index.json', base));
-  const entries = await Promise.all(index.order.map(async id =>
-    [id, resolvePlayer(id, await readJson(asset(id + '/player.json', base)), new URL(id + '/', base))]));
+  const formCache = new Map();
+  const entries = await Promise.all(index.order.map(async id => {
+    const data = await readJson(asset(id + '/player.json', base));
+    if (!data.form) return [id, resolvePlayer(id, data, new URL(id + '/', base))];
+    if (!formCache.has(data.form)) formCache.set(data.form, loadForm(data.form, formBase));
+    return [id, resolveFormPlayer(id, data, await formCache.get(data.form))];
+  }));
   const roster = new Map(entries);
   roster.defaultId = roster.has(index.default) ? index.default : index.order[0];
   return roster;

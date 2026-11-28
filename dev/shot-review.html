@@ -9,6 +9,7 @@ figure{margin:0;text-align:center;background:#216563}figcaption{font-size:14px;p
 canvas{display:block;image-rendering:pixelated}figure canvas{width:min(100%,128px);margin:auto}#court{width:100%;aspect-ratio:4/5;margin-top:8px}
 </style>
 <main><h1>선수 슛폼 검수</h1><label>선수 <select id="player"></select></label>
+<label id="outfitControl" hidden>의상 <select id="outfit"></select></label>
 <label id="motionControl" hidden><input id="secondary" type="checkbox" checked> 상체 후속 움직임</label>
 <div id="poses">
 <figure><canvas width="128" height="128"></canvas><figcaption>릴리즈 직전</figcaption></figure>
@@ -18,11 +19,11 @@ canvas{display:block;image-rendering:pixelated}figure canvas{width:min(100%,128p
 <button id="normal" disabled>실제 속도</button> <button id="slow" disabled>¼배속</button>
 <p id="status" role="status"></p><canvas id="court" aria-label="코트에서 재생한 점프슛"></canvas></main>
 <script type="module">
-import {loadRoster, initialPlayer} from '../game/players.js?v=0cfd164';
-import {loadPlayer} from '../game/player-renderer.js?v=0cfd164';
-import {createRenderer} from '../game/render.js?v=0cfd164';
-import {newMatch, charge, release} from '../game/match.js?v=0cfd164';
-import {scene,rules} from '../game/defaults.js?v=0cfd164';
+import {loadRoster, initialPlayer, costumesOf, outfitArt} from '../game/players.js?v=9dbeb07';
+import {loadPlayer} from '../game/player-renderer.js?v=9dbeb07';
+import {createRenderer} from '../game/render.js?v=9dbeb07';
+import {newMatch, charge, release} from '../game/match.js?v=9dbeb07';
+import {scene,rules} from '../game/defaults.js?v=9dbeb07';
 
 const el = id => document.getElementById(id);
 const select = el('player'), status = el('status'), court = el('court');
@@ -37,10 +38,17 @@ async function show() {
   cancelAnimationFrame(animation);
   el('normal').disabled = el('slow').disabled = true;
   status.textContent = '도트 불러오는 중';
-  const base = roster.get(select.value);
-  el('motionControl').hidden = !base.motionAtlas;
-  const spec = el('secondary').checked ? base : {...base, motionAtlas:null};
+  const base = roster.get(select.value), outfits = costumesOf(base);
+  if (el('outfit').dataset.player !== select.value) {
+    el('outfit').replaceChildren(...outfits.map(c => new Option(c.name, c.id)));
+    el('outfit').dataset.player = select.value;
+  }
+  el('outfitControl').hidden = outfits.length < 2;
   try {
+    const art = await outfitArt(base, el('outfit').value);
+    if (current !== version) return;
+    el('motionControl').hidden = !(art.motionImage || art.motionAtlas);
+    const spec = el('secondary').checked ? {...base, ...art} : {...base, ...art, motionImage:null, motionAtlas:null};
     const [actor,draw] = await Promise.all([loadPlayer(spec),createRenderer(court,{...scene,player:spec},rules)]);
     if (current !== version) return;
     const detach = spec.releaseMs;
@@ -81,5 +89,6 @@ async function show() {
 }
 select.onchange = show;
 el('secondary').onchange = show;
+el('outfit').onchange = show;
 show();
 </script></html>

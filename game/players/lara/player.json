@@ -1,79 +1,12 @@
 {
   "name": "라라",
   "status": "original",
-  "sheet": "costumes/cherry-pleats.webp",
-  "cellSize": 256,
-  "columns": 4,
-  "drawSize": 128,
-  "pivot": [64,118],
-  "standingPixels": 96,
-  "strideM": 1.18,
-  "releaseMs": 215,
-  "jump": {
-    "startMs": 15,
-    "durationMs": 400,
-    "peakPixels": 26
-  },
-  "loopMs": {
-    "ready": 880,
-    "walk": 520
-  },
-  "poses": {
-    "ready": [[0,0],[470,1]],
-    "hold": [[0,1],[60,2],[130,8],[205,9],[265,3]],
-    "flight": [[0,3],[75,4],[155,10],[215,5],[300,6],[375,11],[415,7],[550,1],[650,0]],
-    "walk": [[0,12],[130,13],[260,14],[390,15]],
-    "fumble": [[0,3],[80,9],[140,8],[220,2],[500,1],[710,0]]
-  },
-  "hands": [
-    [89,49],[89,53],[80,69],[82,28],[88,21],[97,12],[101,12],[92,72],
-    [81,45],[82,28],[85,15],[88,56],[90,52],[86,53],[93,48],[91,46]
-  ],
-  "heightM": 1.7,
+  "notes": "첫 공용 폼 선수. 시트는 게임이 game/forms/right-regular-b2의 부품으로 실시간 합성한다.",
   "form": "right-regular-b2",
+  "head": "head",
+  "heightM": 1.7,
   "wardrobe": {
-    "top": {
-      "cherry": "체리 탱크톱",
-      "mint": "네이비 민트 크롭티"
-    },
-    "bottom": {
-      "pleats": "플리츠스커트",
-      "graphite": "그래파이트 트랙팬츠"
-    }
-  },
-  "costumes": [
-    {
-      "id": "cherry-pleats",
-      "name": "체리 탱크톱 · 플리츠스커트",
-      "sheet": "costumes/cherry-pleats.webp",
-      "top": "cherry",
-      "bottom": "pleats",
-      "motionSheet": "motion/cherry-pleats.png"
-    },
-    {
-      "id": "cherry-graphite",
-      "name": "체리 탱크톱 · 그래파이트 트랙팬츠",
-      "sheet": "costumes/cherry-graphite.webp",
-      "top": "cherry",
-      "bottom": "graphite",
-      "motionSheet": "motion/cherry-graphite.png"
-    },
-    {
-      "id": "mint-pleats",
-      "name": "네이비 민트 크롭티 · 플리츠스커트",
-      "sheet": "costumes/mint-pleats.webp",
-      "top": "mint",
-      "bottom": "pleats",
-      "motionSheet": "motion/mint-pleats.png"
-    },
-    {
-      "id": "mint-graphite",
-      "name": "네이비 민트 크롭티 · 그래파이트 트랙팬츠",
-      "sheet": "costumes/mint-graphite.webp",
-      "top": "mint",
-      "bottom": "graphite",
-      "motionSheet": "motion/mint-graphite.png"
-    }
-  ],
-  "flightMotion": [[32,75,0],[75,132,1],[383,415,2],[427,486,3],[501,543,4]]
+    "top": ["cherry","mint"],
+    "bottom": ["pleats","graphite"]
+  }
 }

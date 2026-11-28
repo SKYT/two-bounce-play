@@ -7,9 +7,10 @@ async function decodeAtlas(url) {
 
 export async function loadPlayer(spec) {
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)');
+  // Composed outfits arrive as canvases (atlasImage/motionImage); sheet players as URLs.
   const [image, motionImage] = await Promise.all([
-    decodeAtlas(spec.atlas),
-    spec.motionAtlas ? decodeAtlas(spec.motionAtlas) : null
+    spec.atlasImage ?? decodeAtlas(spec.atlas),
+    spec.motionImage ?? (spec.motionAtlas ? decodeAtlas(spec.motionAtlas) : null)
   ]);
   return {
     pose(state, elapsed) {
