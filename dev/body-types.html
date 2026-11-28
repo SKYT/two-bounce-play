@@ -1,0 +1,107 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>투바운드 · 체형 미리보기</title><style>
+*{box-sizing:border-box}body{margin:0;background:#10292a;color:#fff8de;font:16px system-ui,sans-serif}main{max-width:720px;margin:auto;padding:16px}
+h1{font-size:28px;margin:0 0 4px}p{margin:6px 0;color:#d6e4dc}a{color:#ffd28a}
+#note{color:#ffc158;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+button{font:inherit;border:0;border-radius:10px;padding:8px 12px;background:#fff4d3;color:#142d2e}
+button[aria-pressed=true]{background:#ffc158;font-weight:800}
+#types{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+figure{margin:0;background:#1b3d3d;border-radius:14px;padding:8px;text-align:center}
+figure canvas{width:100%;image-rendering:pixelated;background:#216563;border-radius:10px;display:block}
+figcaption strong{display:block;margin-top:6px}figcaption small{color:#b9cbc3}
+.preview{outline:2px dashed #ffc158;outline-offset:-2px}
+#sheet canvas{width:100%;image-rendering:pixelated;background:#216563;border-radius:10px}
+</style><main>
+<h1>체형 미리보기</h1>
+<p>기준 마네킹의 맨살 몸을 계획대로 변형해 그린 미리보기예요. GPT가 그리기 전에 체형 차이를 확인하는 용도라 실제 그림과는 다를 수 있어요. 점선 테두리가 미리보기, 실선이 완성된 그림이에요.</p>
+<p id="note"></p>
+<div class="controls" role="group" aria-label="보기">
+  <button data-mode="ready" aria-pressed="true">대기</button>
+  <button data-mode="shot" aria-pressed="false">슛</button>
+  <button data-mode="walk" aria-pressed="false">걷기</button>
+  <button data-mode="sheet" aria-pressed="false">16칸 전체</button>
+</div>
+<div id="types"></div>
+<div id="sheet" hidden></div>
+<p><a href="./">개발 설정으로</a></p>
+</main>
+<script type="module">
+// Data: dev/body-previews/index.json, written by scripts/body-preview.py (this page only draws it).
+const ZOOM = 2, CROP = [18, 92];   // x range of the cell shown (the figures stand around the pivot)
+let mode = 'ready', items = [], start = performance.now();
+
+function cellAt(rig, state, ms) {
+  const keys = rig.poses[state];
+  let cell = keys[0][1];
+  for (const [at, c] of keys) if (ms >= at) cell = c;
+  return cell;
+}
+function frameCell(rig, now) {
+  const t = now - start;
+  if (mode === 'ready') return cellAt(rig, 'ready', t % (rig.loopMs?.ready || 880));
+  if (mode === 'walk') return cellAt(rig, 'walk', t % (rig.loopMs?.walk || 520));
+  const hold = rig.poses.hold.at(-1)[0] + 120, flight = rig.poses.flight.at(-1)[0] + 160, rest = 600;
+  const s = t % (hold + flight + rest);
+  if (s < hold) return cellAt(rig, 'hold', s);
+  if (s < hold + flight) return cellAt(rig, 'flight', s - hold);
+  return cellAt(rig, 'ready', 0);
+}
+function draw(now) {
+  for (const it of items) {
+    const {rig, image, ctx, canvas} = it;
+    if (!image) {
+      ctx.fillStyle = '#9fb7af'; ctx.font = '600 22px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText('그림 대기', canvas.width / 2, canvas.height / 2);
+      continue;
+    }
+    if (!image.complete) continue;
+    const size = rig.cellSize, cell = frameCell(rig, now);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, (cell % rig.columns) * size + CROP[0], Math.floor(cell / rig.columns) * size, CROP[1], size,
+      0, 0, CROP[1] * ZOOM, size * ZOOM);
+  }
+  if (mode !== 'sheet') requestAnimationFrame(draw);
+}
+function showSheet() {
+  const box = document.getElementById('sheet');
+  box.replaceChildren();
+  for (const it of items) {
+    if (!it.image) continue;
+    const fig = document.createElement('figure');
+    fig.className = it.kind === 'preview' ? 'preview' : '';
+    const c = document.createElement('canvas');
+    c.width = it.image.width; c.height = it.image.height;
+    const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(it.image, 0, 0);
+    const cap = document.createElement('figcaption');
+    cap.innerHTML = `<strong>${it.name}</strong><small>${it.note}</small>`;
+    fig.append(c, cap); box.append(fig);
+  }
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
+  mode = b.dataset.mode; start = performance.now();
+  document.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  document.getElementById('types').hidden = mode === 'sheet';
+  document.getElementById('sheet').hidden = mode !== 'sheet';
+  if (mode === 'sheet') showSheet(); else requestAnimationFrame(draw);
+});
+
+const data = await fetch('./body-previews/index.json').then(r => r.json());
+document.getElementById('note').textContent = data.note || '';
+const box = document.getElementById('types');
+for (const t of data.types) {
+  const rig = t.rig || data.rig;
+  const fig = document.createElement('figure');
+  if (t.kind === 'preview') fig.className = 'preview';
+  const canvas = document.createElement('canvas');
+  canvas.width = CROP[1] * ZOOM; canvas.height = rig.cellSize * ZOOM;
+  const ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false;
+  let image = null;
+  if (t.kind !== 'waiting') { image = new Image(); image.src = t.src ? `../${t.src}` : `./body-previews/${t.id}.png?${data.version}`; }
+  const cap = document.createElement('figcaption');
+  cap.innerHTML = `<strong>${t.name}</strong><small>${t.note}</small>`;
+  fig.append(canvas, cap); box.append(fig);
+  items.push({...t, rig, image, ctx, canvas});
+}
+requestAnimationFrame(draw);
+</script>
+</html>
