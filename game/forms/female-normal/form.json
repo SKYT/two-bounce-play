@@ -49,6 +49,8 @@
   "cover": {
     "top": "cover/top.png",
     "bottom": "cover/bottom.png",
-    "accessory": "cover/accessory.png"
+    "accessory": "cover/accessory.png",
+    "arms": "cover/arms.png",
+    "armsFrom": "bottom:graphite"
   }
 }

@@ -1,8 +1,8 @@
 // Character-select stage: the chosen player, large, idling with the ball and showing their jump shot every few
 // seconds. Switching players plays a short walk-in. It reuses the game's own sprite code, so a new player or
 // outfit appears here with no extra data. Reduced motion shows a still ready pose.
-import {loadPlayer} from './player-renderer.js?v=0d03931';
-import {createBallSprite} from './art/ball.js?v=0d03931';
+import {loadPlayer} from './player-renderer.js?v=e7d2609';
+import {createBallSprite} from './art/ball.js?v=e7d2609';
 
 // Room above the head for the highest jumper (35 dots) plus the released ball.
 const W = 240, H = 176, FLOOR = 158, CENTER = 140;
