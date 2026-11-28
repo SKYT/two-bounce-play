@@ -13,6 +13,11 @@
     #home { display: grid; gap: 14px; padding: 24px 0 }
     canvas { image-rendering: pixelated; width: 100%; aspect-ratio: 4/5; display: block; border-radius: 16px; margin: 14px 0; touch-action: none }
     button { font: inherit; border: 0; border-radius: 10px; padding: 10px; background: #fff4d3; color: #142d2e }
+    #stage {margin:0;position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(#1d4846,#122f30)}
+    #stage canvas {aspect-ratio:240/176;margin:0;border-radius:0}
+    #stage figcaption {position:absolute;left:14px;top:12px;max-width:42%;display:grid;gap:4px;text-shadow:0 2px 0 #0b1f20}
+    #stageName {font-size:24px}
+    #stageOutfit {font-size:13px;color:#d8e8d0}
     #roster {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     #roster button {display:flex;align-items:center;justify-content:center;gap:4px;flex:1;background:#193c3b;color:#fff4d3;border:2px solid transparent;font-weight:700}
     #roster button[aria-pressed="true"] {border-color:#ffc158;background:#284a42}
@@ -40,6 +45,10 @@
   <main>
     <header><h1>투바운드</h1></header>
     <section id="home">
+      <figure id="stage">
+        <canvas id="preview" width="240" height="176" aria-hidden="true"></canvas>
+        <figcaption><strong id="stageName"></strong><span id="stageOutfit"></span></figcaption>
+      </figure>
       <div id="roster" role="group" aria-label="선수 선택"></div>
       <div id="costumes" role="group" aria-label="의상 선택" hidden></div>
       <p id="costumeName" aria-live="polite"></p>
@@ -55,6 +64,6 @@
       <footer><button id="leave">게임 종료 후 홈으로</button></footer>
     </section>
   </main>
-  <script type="module" src="./game/main.js?v=1c3e330"></script>
+  <script type="module" src="./game/main.js?v=55ceed4"></script>
 </body>
 </html>

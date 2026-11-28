@@ -1,5 +1,5 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=1c3e330';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=55ceed4';
 
 const playerKey = 'two-bounce:player';
 const costumeKey = id => 'two-bounce:costume:' + id;
@@ -34,7 +34,7 @@ function portraitFromAtlas(spec, url) {
 
 // onChoose(id, costumeId, spec) runs for every choice; it returns a promise that settles when the player is ready.
 // remember() stores the choice once the player has loaded.
-export function setupHome({roster, portraits, cardsBox, costumesBox, costumeName, query, onChoose}) {
+export function setupHome({roster, portraits, preview, stageName, stageOutfit, cardsBox, costumesBox, costumeName, query, onChoose}) {
   const portrait = (id, costumeId) => {
     const spec = roster.get(id), costume = costumeId ?? costumesOf(spec)[0].id;
     return portraitFromSheet(portraits, costume === 'base' ? id : id + '/' + costume) ||
@@ -103,6 +103,12 @@ export function setupHome({roster, portraits, cardsBox, costumesBox, costumeName
     try { art = await outfitArt(base, costume); } catch { art = null; }
     if (turn !== latest) return; // a newer choice was made while this outfit was being built
     if (!art) return onChoose(null, retry);
+    if (preview) {
+      const outfit = costumesOf(base).find(c => c.id === costume);
+      stageName.textContent = base.name;
+      stageOutfit.textContent = costumesOf(base).length > 1 ? outfit.name : '';
+      preview.show({...base, ...art}).catch(() => {});
+    }
     const ready = await onChoose({...base, ...art}, retry);
     if (ready) prefetchWardrobe(base);
     if (ready && remember) {

@@ -1,9 +1,10 @@
-import {scene as baseScene, rules} from './defaults.js?v=1c3e330';
-import {loadRoster, loadPortraits} from './players.js?v=1c3e330';
-import {setupHome} from './home.js?v=1c3e330';
-import {createRenderer} from './render.js?v=1c3e330';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=1c3e330';
-import {enableAudio, tone, swish} from './audio.js?v=1c3e330';
+import {scene as baseScene, rules} from './defaults.js?v=55ceed4';
+import {loadRoster, loadPortraits} from './players.js?v=55ceed4';
+import {setupHome} from './home.js?v=55ceed4';
+import {createPreview} from './preview.js?v=55ceed4';
+import {createRenderer} from './render.js?v=55ceed4';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=55ceed4';
+import {enableAudio, tone, swish} from './audio.js?v=55ceed4';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');
@@ -61,6 +62,7 @@ function startGame() {
   cancelAnimationFrame(frameId);
   game = newMatch();
   input = null;
+  preview.pause();
   home.hidden = true;
   court.hidden = false;
   el('gameOver').hidden = true;
@@ -108,12 +110,16 @@ button.onkeydown = e => {
 };
 button.onkeyup = e => { if (e.key === ' ' || e.key === 'Enter') lift('key'); };
 window.addEventListener('blur',cancel);
-document.addEventListener('visibilitychange',() => { if (document.hidden) cancel(); });
+document.addEventListener('visibilitychange',() => {
+  if (document.hidden) { cancel(); preview.pause(); }
+  else if (!home.hidden) preview.resume();
+});
 el('leave').onclick = () => {
   cancelAnimationFrame(frameId);
   cancel();
   court.hidden = true;
   home.hidden = false;
+  preview.resume();
   showRecord();
   play.focus();
 };
@@ -152,7 +158,8 @@ async function selectPlayer(player, retryChoice) {
 
 play.disabled = true;
 play.textContent = '선수 목록 불러오는 중';
-Promise.all([loadRoster(), loadPortraits()]).then(([roster, portraits]) => setupHome({roster, portraits, cardsBox:el('roster'), costumesBox:el('costumes'),
+const preview = createPreview(el('preview'), baseScene.ball);
+Promise.all([loadRoster(), loadPortraits()]).then(([roster, portraits]) => setupHome({roster, portraits, preview, stageName:el('stageName'), stageOutfit:el('stageOutfit'), cardsBox:el('roster'), costumesBox:el('costumes'),
   costumeName:el('costumeName'), query:new URLSearchParams(location.search), onChoose:selectPlayer}))
   .catch(() => {
     play.textContent = '선수 목록을 불러오지 못했어요 · 새로고침';
