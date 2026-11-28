@@ -1,13 +1,13 @@
-import {scene as baseScene, rules} from './defaults.js?v=5089fc8';
-import {loadRoster, loadPortraits, addCustomPlayers} from './players.js?v=5089fc8';
-import {formsOf, validRecipe, recipeData, decodeRecipe, encodeRecipe, migrateRecipe, MAX_CUSTOM} from './custom.js?v=5089fc8';
-import {setupCreator} from './creator.js?v=5089fc8';
-import {setupHome} from './home.js?v=5089fc8';
-import {stored} from './storage.js?v=5089fc8';
-import {createPreview} from './preview.js?v=5089fc8';
-import {createRenderer} from './render.js?v=5089fc8';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=5089fc8';
-import {enableAudio, tone, swish} from './audio.js?v=5089fc8';
+import {scene as baseScene, rules} from './defaults.js?v=7f79cd4';
+import {loadRoster, loadPortraits, addCustomPlayers} from './players.js?v=7f79cd4';
+import {formsOf, validRecipe, recipeData, decodeRecipe, encodeRecipe, migrateRecipe, MAX_CUSTOM} from './custom.js?v=7f79cd4';
+import {setupCreator} from './creator.js?v=7f79cd4';
+import {setupHome} from './home.js?v=7f79cd4';
+import {stored} from './storage.js?v=7f79cd4';
+import {createPreview} from './preview.js?v=7f79cd4';
+import {createRenderer} from './render.js?v=7f79cd4';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=7f79cd4';
+import {enableAudio, tone, swish} from './audio.js?v=7f79cd4';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');

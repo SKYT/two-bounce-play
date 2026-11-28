@@ -1,9 +1,9 @@
 // Character-select stage: the chosen player, large, idling with the ball and showing their jump shot every few
 // seconds. Switching players plays a short walk-in. It reuses the game's own sprite code, so a new player or
 // outfit appears here with no extra data. Reduced motion shows a still ready pose.
-import {loadPlayer} from './player-renderer.js?v=5089fc8';
-import {createBallSprite} from './art/ball.js?v=5089fc8';
-import {accentOf} from './stats.js?v=5089fc8';
+import {loadPlayer} from './player-renderer.js?v=7f79cd4';
+import {ball as ballSpec, createBallSprite} from './art/ball.js?v=7f79cd4';
+import {accentOf} from './stats.js?v=7f79cd4';
 
 // Room above the head for the highest jumper (35 dots) plus the released ball.
 const W = 240, H = 176, FLOOR = 158, CENTER = 140;
@@ -76,7 +76,8 @@ export function createPreview(canvas, ballStyle) {
     actor.draw(ctx, feet, 1, scale, pose);
 
     // ball: in the hands, then up and away after the release
-    const size = 13;
+    // the same ball-to-player proportion as on the court (scale 1: one art pixel per stage pixel)
+    const size = spec.standingPixels && spec.heightM ? ballSpec.diameterM * spec.standingPixels / spec.heightM : 13;
     let hand = actor.hand(feet, 1, scale, pose), alpha = 1;
     if (step.state === 'flight' && step.ms >= spec.releaseMs) {
       const from = actor.hand(feet, 1, scale, actor.pose('flight', spec.releaseMs));
