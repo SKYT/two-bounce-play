@@ -1,8 +1,8 @@
 {
   "name": "라라",
   "status": "original",
-  "notes": "첫 공용 폼 선수. 시트는 게임이 game/forms/female-normal의 부품으로 실시간 합성한다.",
-  "form": "female-normal",
+  "notes": "첫 공용 폼 선수. 시트는 게임이 game/forms/female-healthy의 부품으로 실시간 합성한다.",
+  "form": "female-healthy",
   "head": "head",
   "heightM": 1.7,
   "wardrobe": {

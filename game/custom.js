@@ -34,13 +34,13 @@ export function choicesOf(entry) {
 // The first choice of everything: a valid starting recipe for the creator.
 export function defaultRecipe(entry, name = '내 선수') {
   const c = choicesOf(entry);
-  return {form: entry.id, head: entry.form.defaultHead ?? c.heads[0]?.id, top: c.tops[0].id, bottom: c.bottoms[0].id,
+  return {v: RECIPE_VERSION, form: entry.id, head: entry.form.defaultHead ?? c.heads[0]?.id, top: c.tops[0].id, bottom: c.bottoms[0].id,
     hand: 'right', rhythm: c.rhythms[0].id, height: 'm', name};
 }
 
 export function randomRecipe(entry, name, random = Math.random) {
   const c = choicesOf(entry), pick = list => list[Math.floor(random() * list.length)].id;
-  return {form: entry.id, head: c.heads.length ? pick(c.heads) : undefined, top: pick(c.tops), bottom: pick(c.bottoms),
+  return {v: RECIPE_VERSION, form: entry.id, head: c.heads.length ? pick(c.heads) : undefined, top: pick(c.tops), bottom: pick(c.bottoms),
     hand: pick(c.hands), rhythm: pick(c.rhythms), height: pick(c.heights), name};
 }
 
@@ -67,7 +67,7 @@ export function recipeData(recipe, forms) {
 const SHORT = {form: 'f', head: 'h', top: 't', bottom: 'b', hand: 's', rhythm: 'r', height: 'k', name: 'n'};
 export function encodeRecipe(recipe) {
   const compact = Object.fromEntries(Object.entries(SHORT).filter(([k]) => recipe[k] !== undefined).map(([k, s]) => [s, recipe[k]]));
-  const bytes = new TextEncoder().encode(JSON.stringify({v: 1, ...compact}));
+  const bytes = new TextEncoder().encode(JSON.stringify({v: RECIPE_VERSION, ...compact}));
   let text = '';
   for (const b of bytes) text += String.fromCharCode(b);
   return btoa(text).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
@@ -76,11 +76,21 @@ export function decodeRecipe(code) {
   try {
     const text = atob(code.replaceAll('-', '+').replaceAll('_', '/'));
     const data = JSON.parse(new TextDecoder().decode(Uint8Array.from(text, c => c.charCodeAt(0))));
-    if (data.v !== 1) return null;
-    return Object.fromEntries(Object.entries(SHORT).filter(([, s]) => data[s] !== undefined).map(([k, s]) => [k, data[s]]));
+    if (!(data.v >= 1 && data.v <= RECIPE_VERSION)) return null;
+    const recipe = Object.fromEntries(Object.entries(SHORT).filter(([, s]) => data[s] !== undefined).map(([k, s]) => [k, data[s]]));
+    return migrateRecipe({...recipe, v: data.v});
   } catch {
     return null;
   }
+}
+
+// Recipe versions. v1 recipes (saved and shared before 2026-11-28 evening) named lara's mannequin "female-normal";
+// it is now "female-healthy", and "female-normal" is the saemi-based mannequin. Old recipes move once.
+export const RECIPE_VERSION = 2;
+const RENAMED_V1 = {'female-normal': 'female-healthy'};
+export function migrateRecipe(recipe) {
+  if (!recipe || (recipe.v ?? 1) >= RECIPE_VERSION) return recipe;
+  return {...recipe, form: RENAMED_V1[recipe.form] ?? recipe.form, v: RECIPE_VERSION};
 }
 
 // Saved recipes get ids my-1 … my-5; a new one takes the first free number.

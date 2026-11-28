@@ -1,13 +1,13 @@
-import {scene as baseScene, rules} from './defaults.js?v=eeb94fb';
-import {loadRoster, loadPortraits, addCustomPlayers} from './players.js?v=eeb94fb';
-import {formsOf, validRecipe, recipeData, decodeRecipe, encodeRecipe, MAX_CUSTOM} from './custom.js?v=eeb94fb';
-import {setupCreator} from './creator.js?v=eeb94fb';
-import {setupHome} from './home.js?v=eeb94fb';
-import {stored} from './storage.js?v=eeb94fb';
-import {createPreview} from './preview.js?v=eeb94fb';
-import {createRenderer} from './render.js?v=eeb94fb';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=eeb94fb';
-import {enableAudio, tone, swish} from './audio.js?v=eeb94fb';
+import {scene as baseScene, rules} from './defaults.js?v=5089fc8';
+import {loadRoster, loadPortraits, addCustomPlayers} from './players.js?v=5089fc8';
+import {formsOf, validRecipe, recipeData, decodeRecipe, encodeRecipe, migrateRecipe, MAX_CUSTOM} from './custom.js?v=5089fc8';
+import {setupCreator} from './creator.js?v=5089fc8';
+import {setupHome} from './home.js?v=5089fc8';
+import {stored} from './storage.js?v=5089fc8';
+import {createPreview} from './preview.js?v=5089fc8';
+import {createRenderer} from './render.js?v=5089fc8';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=5089fc8';
+import {enableAudio, tone, swish} from './audio.js?v=5089fc8';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');
@@ -166,7 +166,9 @@ const query = new URLSearchParams(location.search);
 // "My players": saved creator recipes join the roster; a selected one gets edit / share / delete.
 function setupCustom(roster) {
   const forms = formsOf(roster);
-  const saved = stored.customs().filter(r => validRecipe(r, forms));
+  const all = stored.customs().map(migrateRecipe);
+  stored.setCustoms(all);   // old recipes are moved once (see migrateRecipe)
+  const saved = all.filter(r => validRecipe(r, forms));
   addCustomPlayers(roster, saved.map(r => [r.id, recipeData(r, forms)]));
   const creatorSection = el('creator');
   const creator = setupCreator({roster, ballStyle: baseScene.ball,

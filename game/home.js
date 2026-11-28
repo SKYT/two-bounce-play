@@ -1,8 +1,8 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=eeb94fb';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=5089fc8';
 
-import {stored} from './storage.js?v=eeb94fb';
-import {rosterBars} from './stats.js?v=eeb94fb';
+import {stored} from './storage.js?v=5089fc8';
+import {rosterBars} from './stats.js?v=5089fc8';
 
 // Jump height and release speed under the stage name, as bars scaled to the roster plus the real numbers.
 export function showStats(box, stats) {
