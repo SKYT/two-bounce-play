@@ -1,5 +1,5 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt} from './players.js?v=9dbeb07';
+import {initialPlayer, costumesOf, initialCostume, outfitArt} from './players.js?v=866d6cd';
 
 const playerKey = 'two-bounce:player';
 const costumeKey = id => 'two-bounce:costume:' + id;

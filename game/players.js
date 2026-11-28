@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=9dbeb07';
-import {composeOutfit} from './compose.js?v=9dbeb07';
+import {asset} from './version.js?v=866d6cd';
+import {composeOutfit} from './compose.js?v=866d6cd';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
