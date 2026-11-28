@@ -5,7 +5,7 @@
 // The pure functions work on {width, height, data} RGBA images so Node tests can compare them with
 // scripts/compose-mannequin.py pixel for pixel. Only composeOutfit() touches the DOM.
 
-import {recolor} from './recolor.js?v=e2f48aa';
+import {recolor} from './recolor.js?v=28d8d0e';
 
 // Patch alpha: 0 keeps the pixel underneath, 128 clears it, 255 replaces it.
 export function applyPatch(base, part) {

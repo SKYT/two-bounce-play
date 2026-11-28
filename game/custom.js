@@ -3,7 +3,7 @@
 // Every choice comes from the form (heads, tops, bottoms) and from the roster (shot rhythm of players on that
 // form), so a new part or player drawn by GPT shows up here with no extra data.
 
-import {COLORS} from './recolor.js?v=e2f48aa';
+import {COLORS} from './recolor.js?v=28d8d0e';
 
 export const MAX_CUSTOM = 5;
 export const HEIGHTS = [{id: 's', name: '작게', heightM: 1.62}, {id: 'm', name: '보통', heightM: 1.70},

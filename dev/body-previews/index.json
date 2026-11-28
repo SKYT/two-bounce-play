@@ -1,5 +1,5 @@
 {
-  "version": "f6ec92b7",
+  "version": "08c4ec1e",
   "sexes": [
     {
       "id": "female",
@@ -11,9 +11,10 @@
           "name": "마른몸",
           "kind": "preview",
           "morph": {
-            "limbs": -1,
-            "chest": -1,
-            "hip": -1
+            "slim": 0.22,
+            "limbs": 0,
+            "chest": -2,
+            "hip": -2
           },
           "note": "미리보기(기준에서 변형)"
         },
@@ -52,6 +53,7 @@
           "name": "글래머",
           "kind": "preview",
           "morph": {
+            "slim": 0,
             "limbs": 0,
             "chest": 3,
             "hip": 2
