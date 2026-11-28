@@ -1,10 +1,7 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=55ceed4';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=71ea146';
 
-const playerKey = 'two-bounce:player';
-const costumeKey = id => 'two-bounce:costume:' + id;
-const load = key => { try { return localStorage.getItem(key); } catch { return null; } };
-const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+import {stored} from './storage.js?v=71ea146';
 
 // A portrait comes from the published portrait sheet when it exists, otherwise from the player's own sheet
 // (url may be a promise: composed outfits are built in the browser first).
@@ -95,7 +92,7 @@ export function setupHome({roster, portraits, preview, stageName, stageOutfit, c
     const turn = ++latest;
     const base = roster.get(id);
     // An explicit click picks from storage; the first load may follow ?costume=.
-    const costume = initialCostume(base, costumeId ?? (remember ? null : query.get('costume')), load(costumeKey(id)));
+    const costume = initialCostume(base, costumeId ?? (remember ? null : query.get('costume')), stored.costume(id));
     for (const [key, card] of cards) card.setAttribute('aria-pressed', String(key === id));
     showCostumes(id, costume);
     const retry = () => choose(id, remember, costume);
@@ -112,10 +109,10 @@ export function setupHome({roster, portraits, preview, stageName, stageOutfit, c
     const ready = await onChoose({...base, ...art}, retry);
     if (ready) prefetchWardrobe(base);
     if (ready && remember) {
-      save(playerKey, id);
-      if (costumesOf(base).length > 1) save(costumeKey(id), costume);
+      stored.setPlayer(id);
+      if (costumesOf(base).length > 1) stored.setCostume(id, costume);
     }
   }
 
-  choose(initialPlayer(roster, query.get('player'), load(playerKey)), false);
+  choose(initialPlayer(roster, query.get('player'), stored.player()), false);
 }

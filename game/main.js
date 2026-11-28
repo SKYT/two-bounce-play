@@ -1,18 +1,18 @@
-import {scene as baseScene, rules} from './defaults.js?v=55ceed4';
-import {loadRoster, loadPortraits} from './players.js?v=55ceed4';
-import {setupHome} from './home.js?v=55ceed4';
-import {createPreview} from './preview.js?v=55ceed4';
-import {createRenderer} from './render.js?v=55ceed4';
-import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=55ceed4';
-import {enableAudio, tone, swish} from './audio.js?v=55ceed4';
+import {scene as baseScene, rules} from './defaults.js?v=71ea146';
+import {loadRoster, loadPortraits} from './players.js?v=71ea146';
+import {setupHome} from './home.js?v=71ea146';
+import {stored} from './storage.js?v=71ea146';
+import {createPreview} from './preview.js?v=71ea146';
+import {createRenderer} from './render.js?v=71ea146';
+import {newMatch, charge, cancelCharge, release, advance} from './match.js?v=71ea146';
+import {enableAudio, tone, swish} from './audio.js?v=71ea146';
 
 const el = id => document.getElementById(id);
 const home = el('home'), court = el('court'), canvas = el('view'), button = el('shoot');
-const status = el('status'), play = el('play'), retry = el('retry');
+const status = el('status'), retry = el('retry');
+const play = /** @type {HTMLButtonElement} */ (el('play'));
 const readyText = '자유투 라인 · 꾹 누르고 목표 띠에서 놓으세요';
-const recordKey = 'two-bounce:best:.45';
-let best = 0;
-try { best = Math.max(0,Number(localStorage.getItem(recordKey))||0); } catch {}
+let best = stored.best();
 let game, draw, frameId, input = null;
 let scene = baseScene;
 
@@ -41,7 +41,7 @@ function reflect(event) {
     navigator.vibrate?.([30,45,30]);
     if (game.streak > best) {
       best = game.streak;
-      try { localStorage.setItem(recordKey,String(best)); } catch {}
+      stored.setBest(best);
     }
   }
   const messages = {release:'슛', fumble:'타이밍 놓침 · 공을 놓쳤어요', miss:'림 · 다음 바운드를 보세요',

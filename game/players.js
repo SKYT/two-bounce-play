@@ -1,14 +1,14 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=55ceed4';
-import {composeOutfit, prefetchParts} from './compose.js?v=55ceed4';
+import {asset} from './version.js?v=71ea146';
+import {composeOutfit, prefetchParts} from './compose.js?v=71ea146';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
 
 async function readJson(url) {
   if (url.protocol === 'file:') { // Node tests read straight from disk
-    const {readFile} = await import('node:fs/promises');
+    const {readFile} = await import(/* Node only */ 'node:' + 'fs/promises');
     return JSON.parse(await readFile(url, 'utf8'));
   }
   const response = await fetch(url);
@@ -94,10 +94,10 @@ export async function loadRoster(base = home, formBase = forms) {
       return null;
     }
   }));
-  const roster = new Map(entries.filter(Boolean));
-  if (!roster.size) throw new Error('no player could be loaded');
-  roster.defaultId = roster.has(index.default) ? index.default : index.order[0];
-  return roster;
+  const players = new Map(entries.filter(Boolean));
+  if (!players.size) throw new Error('no player could be loaded');
+  const defaultId = players.has(index.default) ? index.default : [...players.keys()][0];
+  return Object.assign(players, {defaultId});
 }
 
 // Home-screen portraits: one sheet built when publishing (scripts/build-portraits.py). Missing in a
