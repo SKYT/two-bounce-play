@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=2bdf9b8';
-import {composeOutfit, prefetchParts} from './compose.js?v=2bdf9b8';
+import {asset} from './version.js?v=ac7d9bc';
+import {composeOutfit, prefetchParts} from './compose.js?v=ac7d9bc';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
@@ -61,8 +61,8 @@ export function resolveFormPlayer(id, data, form) {
   for (const top of data.wardrobe.top) for (const bottom of data.wardrobe.bottom) {
     costumes.push({id: top + '-' + bottom, name: wardrobe.top[top] + ' · ' + wardrobe.bottom[bottom], top, bottom, head});
   }
-  return {...form.rig, ...data, id, wardrobe, costumes, atlas: null,
-    cellSize: form.rig.cellSize * scale, flightMotion: form.motion?.flight, composed: form};
+  return {...form.rig, ...data, poses: {...form.rig.poses, ...data.poses}, id, wardrobe, costumes, atlas: null,
+    cellSize: form.rig.cellSize * scale, flightMotion: data.flightMotion ?? form.motion?.flight, composed: form};
 }
 
 // Pixels for one outfit: composed players are built in the browser, the rest point at their sheet files.

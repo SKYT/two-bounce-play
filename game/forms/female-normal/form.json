@@ -4,14 +4,46 @@
   "body": "body.png",
   "defaultHead": "head",
   "heads": {
-    "head": {"name": "갈색 하이 포니테일 · 아이보리 헤어밴드", "sheet": "head-detail.png", "mask": "head-mask.png"}
+    "head": {
+      "name": "갈색 하이 포니테일 · 아이보리 헤어밴드",
+      "sheet": "head-detail.png",
+      "mask": "head-mask.png"
+    },
+    "braid": {
+      "name": "흑갈색 외줄 땋은 머리 · 진홍 끈",
+      "sheet": "heads/braid.png",
+      "mask": "heads/braid-mask.png"
+    }
   },
   "tops": {
-    "cherry": {"name": "체리 탱크톱", "sheet": "cherry.png", "motionMask": "motion/cherry.png"},
-    "mint": {"name": "네이비 민트 크롭티", "sheet": "mint.png", "motionMask": "motion/mint.png"}
+    "cherry": {
+      "name": "체리 탱크톱",
+      "sheet": "cherry.png",
+      "motionMask": "motion/cherry.png"
+    },
+    "mint": {
+      "name": "네이비 민트 크롭티",
+      "sheet": "mint.png",
+      "motionMask": "motion/mint.png"
+    },
+    "crimson": {
+      "name": "진홍 크롭탑",
+      "sheet": "crimson.png",
+      "motionMask": "motion/crimson.png"
+    }
   },
   "bottoms": {
-    "pleats": {"name": "플리츠스커트", "sheet": "pleats.png"},
-    "graphite": {"name": "그래파이트 트랙팬츠", "sheet": "graphite.png"}
+    "pleats": {
+      "name": "플리츠스커트",
+      "sheet": "pleats.png"
+    },
+    "graphite": {
+      "name": "그래파이트 트랙팬츠",
+      "sheet": "graphite.png"
+    },
+    "leggings": {
+      "name": "진홍 라인 레깅스",
+      "sheet": "leggings.png"
+    }
   }
 }
