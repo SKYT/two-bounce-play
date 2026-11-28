@@ -1,6 +1,6 @@
-import {ball} from './art/ball.js?v=71ea146';
-import {court} from './art/court.js?v=71ea146';
-import {hoop} from './art/hoop.js?v=71ea146';
+import {ball} from './art/ball.js?v=2bdf9b8';
+import {court} from './art/court.js?v=2bdf9b8';
+import {hoop} from './art/hoop.js?v=2bdf9b8';
 
 // scene.player is filled in by the home screen (game/players.js).
 export const scene = {player: null, ball, court, hoop,

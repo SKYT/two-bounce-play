@@ -1,10 +1,10 @@
-import {loadPlayer} from './player-renderer.js?v=71ea146';
-import {createBallSprite} from './art/ball.js?v=71ea146';
-import {drawCourt} from './art/court.js?v=71ea146';
-import {createHoopLayer} from './art/hoop.js?v=71ea146';
+import {loadPlayer} from './player-renderer.js?v=2bdf9b8';
+import {createBallSprite} from './art/ball.js?v=2bdf9b8';
+import {drawCourt} from './art/court.js?v=2bdf9b8';
+import {createHoopLayer} from './art/hoop.js?v=2bdf9b8';
 
-import {layoutFrame, COURT_SIZE} from './frame.js?v=71ea146';
-export {hitStop} from './frame.js?v=71ea146';
+import {layoutFrame, COURT_SIZE} from './frame.js?v=2bdf9b8';
+export {hitStop} from './frame.js?v=2bdf9b8';
 
 const {width, height} = COURT_SIZE;
 
@@ -69,6 +69,9 @@ export async function createRenderer(canvas, scene, rules) {
   const drawHoop = createHoopLayer(width,height);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   canvas.style.backgroundColor = scene.court.floor;
+  // Left-handed players use the right-handed art mirrored together with the whole court (hoop on the left).
+  // A mirrored right-hander is a left-hander, so no extra sprites are needed. Text is drawn unmirrored.
+  const mirror = scene.player.hand === 'left';
 
   return function draw(game, now) {
     const reduced = motion.matches;
@@ -82,6 +85,7 @@ export async function createRenderer(canvas, scene, rules) {
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0,0,width,height);
     if (f.shake) ctx.translate(f.shake.x,f.shake.y);
+    if (mirror) ctx.transform(-1,0,0,1,width,0);
     drawCourt(ctx,f.view.project,scene.court,scene.hoop.depthM);
     drawHoop(ctx,f.view,scene,f.goal.age,reduced);
     if (f.ripple) {
@@ -114,6 +118,7 @@ export async function createRenderer(canvas, scene, rules) {
     }
     if (f.netInFront) drawHoop(ctx,f.view,scene,f.goal.age,reduced,true);
     if (f.gauge) gauge(ctx,f.feet,f.gauge.band,f.gauge.power);
-    drawGoal(ctx,f.rim,f.goal.age,f.goal.perfect,reduced);
+    if (mirror) ctx.transform(-1,0,0,1,width,0);
+    drawGoal(ctx,mirror ? {...f.rim, x: width-f.rim.x} : f.rim,f.goal.age,f.goal.perfect,reduced);
   };
 }
