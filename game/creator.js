@@ -1,11 +1,11 @@
 // Creator screen: make "my player" from a shared form's parts. Every change is composed live on its own stage
 // with the game's own code. Saving stores the recipe on the device; the page reloads with the new player chosen.
-import {createPreview} from './preview.js?v=7f79cd4';
-import {formsOf, choicesOf, defaultRecipe, randomRecipe, validRecipe, recipeData, nextCustomId, MAX_CUSTOM} from './custom.js?v=7f79cd4';
-import {resolveFormPlayer, outfitArt} from './players.js?v=7f79cd4';
-import {rosterBars} from './stats.js?v=7f79cd4';
-import {showStats} from './home.js?v=7f79cd4';
-import {stored} from './storage.js?v=7f79cd4';
+import {createPreview} from './preview.js?v=dc5e4a5';
+import {formsOf, choicesOf, defaultRecipe, randomRecipe, validRecipe, recipeData, nextCustomId, MAX_CUSTOM} from './custom.js?v=dc5e4a5';
+import {resolveFormPlayer, outfitArt} from './players.js?v=dc5e4a5';
+import {rosterBars} from './stats.js?v=dc5e4a5';
+import {showStats} from './home.js?v=dc5e4a5';
+import {stored} from './storage.js?v=dc5e4a5';
 
 const GROUPS = [['head', 'heads', '머리'], ['top', 'tops', '상의'], ['bottom', 'bottoms', '하의'],
   ['hand', 'hands', '슛 손'], ['rhythm', 'rhythms', '슛 리듬'], ['height', 'heights', '키']];
