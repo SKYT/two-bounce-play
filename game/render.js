@@ -1,10 +1,10 @@
-import {loadPlayer} from './player-renderer.js?v=b7d25f3';
-import {createBallSprite} from './art/ball.js?v=b7d25f3';
-import {drawCourt} from './art/court.js?v=b7d25f3';
-import {createHoopLayer} from './art/hoop.js?v=b7d25f3';
+import {loadPlayer} from './player-renderer.js?v=c3f7d9e';
+import {createBallSprite} from './art/ball.js?v=c3f7d9e';
+import {drawCourt} from './art/court.js?v=c3f7d9e';
+import {createHoopLayer} from './art/hoop.js?v=c3f7d9e';
 
-import {layoutFrame, COURT_SIZE} from './frame.js?v=b7d25f3';
-export {hitStop} from './frame.js?v=b7d25f3';
+import {layoutFrame, COURT_SIZE} from './frame.js?v=c3f7d9e';
+export {hitStop} from './frame.js?v=c3f7d9e';
 
 const {width, height} = COURT_SIZE;
 
@@ -87,7 +87,17 @@ export async function createRenderer(canvas, scene, rules) {
     if (f.shake) ctx.translate(f.shake.x,f.shake.y);
     if (mirror) ctx.transform(-1,0,0,1,width,0);
     drawCourt(ctx,f.view.project,scene.court,scene.hoop.depthM);
+    if (f.glow) {
+      const g = ctx.createRadialGradient(f.glow.x,f.glow.y,0,f.glow.x,f.glow.y,f.glow.r);
+      g.addColorStop(0,`rgba(255,214,140,${f.glow.alpha})`);
+      g.addColorStop(1,'rgba(255,214,140,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(f.glow.x-f.glow.r,f.glow.y-f.glow.r,f.glow.r*2,f.glow.r*2);
+    }
+    ctx.save();
+    ctx.translate(0,f.rimWobble);
     drawHoop(ctx,f.view,scene,f.goal.age,reduced);
+    ctx.restore();
     if (f.ripple) {
       ctx.save();
       ctx.globalAlpha = f.ripple.alpha;
@@ -99,6 +109,15 @@ export async function createRenderer(canvas, scene, rules) {
       ctx.restore();
     }
     for (const s of f.shadows) shadow(ctx,s.x,s.y,s.rx,s.alpha);
+    for (const d of f.dust) {
+      ctx.save();
+      ctx.globalAlpha = d.alpha;
+      ctx.fillStyle = '#ece6d2';
+      ctx.beginPath();
+      ctx.ellipse(d.x,d.y,d.r,d.r*.55,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
     for (const ghost of f.ghosts) {
       ctx.save();
       ctx.globalAlpha = ghost.alpha;

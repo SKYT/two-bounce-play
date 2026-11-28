@@ -19,11 +19,11 @@ canvas{display:block;image-rendering:pixelated}figure canvas{width:min(100%,128p
 <button id="normal" disabled>실제 속도</button> <button id="slow" disabled>¼배속</button>
 <p id="status" role="status"></p><canvas id="court" aria-label="코트에서 재생한 점프슛"></canvas></main>
 <script type="module">
-import {loadRoster, initialPlayer, costumesOf, outfitArt} from '../game/players.js?v=b7d25f3';
-import {loadPlayer} from '../game/player-renderer.js?v=b7d25f3';
-import {createRenderer} from '../game/render.js?v=b7d25f3';
-import {newMatch, charge, release} from '../game/match.js?v=b7d25f3';
-import {scene,rules} from '../game/defaults.js?v=b7d25f3';
+import {loadRoster, initialPlayer, costumesOf, outfitArt} from '../game/players.js?v=c3f7d9e';
+import {loadPlayer} from '../game/player-renderer.js?v=c3f7d9e';
+import {createRenderer} from '../game/render.js?v=c3f7d9e';
+import {newMatch, charge, release} from '../game/match.js?v=c3f7d9e';
+import {scene,rules} from '../game/defaults.js?v=c3f7d9e';
 
 const el = id => document.getElementById(id);
 const select = el('player'), status = el('status'), court = el('court');

@@ -1,7 +1,7 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=b7d25f3';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=c3f7d9e';
 
-import {stored} from './storage.js?v=b7d25f3';
+import {stored} from './storage.js?v=c3f7d9e';
 
 // A portrait comes from the published portrait sheet when it exists, otherwise from the player's own sheet
 // (url may be a promise: composed outfits are built in the browser first).

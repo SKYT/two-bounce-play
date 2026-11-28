@@ -1,7 +1,7 @@
 // Where everything is on one frame, as plain data: camera, player pose, ball, shadows, effects.
 // render.js only draws what this returns, so the rules of motion can be tested in Node and a different
 // renderer (PixiJS, a replay exporter) can reuse them unchanged.
-import {makeProjection} from './projection.js?v=b7d25f3';
+import {makeProjection} from './projection.js?v=c3f7d9e';
 
 export const COURT_SIZE = {width: 400, height: 500};
 const mix = (a,b,t) => a + (b-a)*t;
@@ -26,6 +26,22 @@ export function hitStop(elapsed, duration, holdMs) {
   if (!holdMs || elapsed <= 0) return elapsed;
   if (elapsed < holdMs) return 0;
   return Math.min(duration, (elapsed-holdMs)*duration/(duration-holdMs));
+}
+
+// When does a jump land? First moment after the highest point where the flight pose is back on the floor.
+// Pose timing never changes for a loaded player, so it is worked out once per actor.
+const landings = new WeakMap();
+export function landingMs(actor) {
+  if (!landings.has(actor)) {
+    let top = 0, topAt = 0, landed = null;
+    for (let t = 0; t <= 2400; t += 8) {
+      const lift = actor.pose('flight',t).lift || 0;
+      if (lift > top) { top = lift; topAt = t; }
+      if (top > 4 && t > topAt && lift <= 1) { landed = t; break; }
+    }
+    landings.set(actor, landed);
+  }
+  return landings.get(actor);
 }
 
 // actor: a loaded player (pose/hand only). reduced: prefers-reduced-motion.
@@ -109,6 +125,36 @@ export function layoutFrame({game, now, scene, rules, actor, reduced = false, si
     }
   }
 
+  // Landing dust: two puffs spreading from the feet for a moment after the jump comes down.
+  const dust = [];
+  const land = landingMs(actor);
+  if (fx.dust && !reduced && land !== null) {
+    const flightLength = detach+rules.flightMs;
+    const age = phase === 'flight' ? elapsed-land :
+      phase === 'bounce' ? raw+flightLength-Math.min(land,flightLength) : -1;
+    if (age >= 0 && age < fx.dust.ms) {
+      const u = age/fx.dust.ms, at = view.floor(spot);   // stays where the jump came down
+      for (const side of [-1,1]) {
+        dust.push({x:at.x+side*(7+u*13)*scale, y:at.y-(1+u*3)*scale, r:(4+u*6)*scale, alpha:.55*(1-u)});
+      }
+    }
+  }
+
+  // A miss rattles off the rim: the hoop shivers briefly.
+  let rimWobble = 0;
+  if (phase === 'bounce' && shot && !shot.hit && fx.rimWobble && !reduced && raw < fx.rimWobble.ms) {
+    rimWobble = Math.round(fx.rimWobble.pixels*(1-raw/fx.rimWobble.ms)*Math.sin(raw*.16));
+  }
+
+  // From the third make in a row, warm light swells behind the hoop, stronger with the streak.
+  let glow = null;
+  const goalAge = now-game.goalAt;
+  if (fx.streakGlow && !reduced && game.streak >= fx.streakGlow.from && goalAge >= 0 && goalAge < fx.streakGlow.ms) {
+    const strength = Math.min(1,(game.streak-fx.streakGlow.from+1)/3);
+    glow = {x:rim.x, y:rim.y-view.scale*.6, r:view.scale*(1.2+strength*.8),
+      alpha:.42*strength*Math.sin(Math.PI*goalAge/fx.streakGlow.ms)};
+  }
+
   const ghosts = [];
   if (phase === 'flight' && fx.afterimage && !reduced && pose.lift > 6) {
     const {count, stepMs, alpha} = fx.afterimage;
@@ -126,7 +172,7 @@ export function layoutFrame({game, now, scene, rules, actor, reduced = false, si
   }
 
   return {
-    view, feet, rim, face, scale, pose, ghosts, shadows, shake, ripple,
+    view, feet, rim, face, scale, pose, ghosts, shadows, shake, ripple, dust, rimWobble, glow,
     ball: {x:center.x, y:center.y, diameter, spin, floor:ballFloor},
     netInFront: phase === 'bounce' && shot.hit && bounce < .32,
     gauge: phase === 'hold' || phase === 'ready' ? {band, power: phase === 'hold' ? elapsed/rules.chargeMs : 0} : null,
