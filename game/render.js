@@ -1,10 +1,10 @@
-import {loadPlayer} from './player-renderer.js?v=e7d2609';
-import {createBallSprite} from './art/ball.js?v=e7d2609';
-import {drawCourt} from './art/court.js?v=e7d2609';
-import {createHoopLayer} from './art/hoop.js?v=e7d2609';
+import {loadPlayer} from './player-renderer.js?v=f5c243d';
+import {createBallSprite} from './art/ball.js?v=f5c243d';
+import {drawCourt} from './art/court.js?v=f5c243d';
+import {createHoopLayer} from './art/hoop.js?v=f5c243d';
 
-import {layoutFrame, COURT_SIZE} from './frame.js?v=e7d2609';
-export {hitStop} from './frame.js?v=e7d2609';
+import {layoutFrame, COURT_SIZE} from './frame.js?v=f5c243d';
+export {hitStop} from './frame.js?v=f5c243d';
 
 const {width, height} = COURT_SIZE;
 
