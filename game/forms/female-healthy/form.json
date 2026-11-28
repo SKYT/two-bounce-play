@@ -1,63 +1,53 @@
 {
   "name": "여성 · 건강 볼륨 (라라 기준 폼)",
   "detailScale": 2,
-  "body": "body.png",
+  "body": "body.webp",
   "defaultHead": "head",
   "heads": {
     "head": {
       "name": "갈색 하이 포니테일 · 아이보리 헤어밴드",
-      "sheet": "head-detail.png",
+      "sheet": "head-detail.webp",
       "mask": "head-mask.png"
     },
     "braid": {
       "name": "흑갈색 외줄 땋은 머리 · 진홍 끈",
-      "sheet": "heads/braid.png",
+      "sheet": "heads/braid.webp",
       "mask": "heads/braid-mask.png"
     }
   },
   "tops": {
     "cherry": {
       "name": "체리 탱크톱",
-      "sheet": "cherry.png",
-      "motionMask": "motion/cherry.png",
+      "sheet": "cherry.webp",
+      "motionMask": "motion/cherry.webp",
       "tucked": true
     },
     "mint": {
       "name": "네이비 민트 크롭티",
-      "sheet": "mint.png",
-      "motionMask": "motion/mint.png",
+      "sheet": "mint.webp",
+      "motionMask": "motion/mint.webp",
       "tucked": true
     },
     "crimson": {
       "name": "진홍 크롭탑",
-      "sheet": "crimson.png",
-      "motionMask": "motion/crimson.png",
+      "sheet": "crimson.webp",
+      "motionMask": "motion/crimson.webp",
       "tucked": true
     }
   },
   "bottoms": {
     "pleats": {
       "name": "플리츠스커트",
-      "sheet": "pleats.png"
+      "sheet": "pleats.webp"
     },
     "graphite": {
       "name": "그래파이트 트랙팬츠",
-      "sheet": "graphite.png"
+      "sheet": "graphite.webp"
     },
     "leggings": {
       "name": "진홍 라인 레깅스",
-      "sheet": "leggings.png"
+      "sheet": "leggings.webp"
     }
-  },
-  "cover": {
-    "top": "cover/top.png",
-    "bottom": "cover/bottom.png",
-    "chest": "cover/chest.png",
-    "groin": "cover/groin.png",
-    "accessory": "cover/accessory.png",
-    "hair": "cover/hair.png",
-    "arms": "cover/arms.png",
-    "from": "part-map.png"
   },
   "layers": {
     "front": "layers/front.png",

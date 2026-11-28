@@ -5,7 +5,7 @@
 // The pure functions work on {width, height, data} RGBA images so Node tests can compare them with
 // scripts/compose-mannequin.py pixel for pixel. Only composeOutfit() touches the DOM.
 
-import {recolor} from './recolor.js?v=aa18cfd';
+import {recolor} from './recolor.js?v=e2f48aa';
 
 // Patch alpha: 0 keeps the pixel underneath, 128 clears it, 255 replaces it.
 export function applyPatch(base, part) {
@@ -184,12 +184,28 @@ export function prefetchParts(form, outfits) {
   later(() => outfits.forEach(outfit => partsFor(form, outfit).catch(() => {})));
 }
 
-// Returns canvases ready for drawImage plus an object URL for CSS portraits; cached per outfit.
+// A composed outfit holds a 1024² sheet (4 MB) and more: the creator makes a new one at every head, garment and
+// colour change, so only the most recently used ones are kept (phone webviews run out of memory otherwise).
+// An entry dropped here is rebuilt when asked for again; anything already drawing it keeps its own canvases.
+export const OUTFITS_KEPT = 16;
+export function cached(cache, key, make, limit = OUTFITS_KEPT) {
+  if (cache.has(key)) {
+    const value = cache.get(key);
+    cache.delete(key);          // most recent last
+    cache.set(key, value);
+    return value;
+  }
+  const value = make();
+  cache.set(key, value);
+  while (cache.size > limit) cache.delete(cache.keys().next().value);
+  return value;
+}
+
+// Returns canvases ready for drawImage plus an object URL for CSS portraits; cached per outfit (see above).
 export async function composeOutfit(form, outfit) {
   const key = form.base.href + '|' + outfit.top + '|' + outfit.bottom + '|' + (outfit.head ?? '') + '|' +
     (outfit.colors?.top ?? '') + '|' + (outfit.colors?.bottom ?? '');
-  if (!outfitCache.has(key)) {
-    outfitCache.set(key, (async () => {
+  return cached(outfitCache, key, () => (async () => {
       const built = buildOutfit(await partsFor(form, outfit), outfit);
       const sheet = toCanvas(built.sheet);
       let url; // PNG encoding is slow: only when a portrait actually needs this outfit as an image URL
@@ -199,7 +215,5 @@ export async function composeOutfit(form, outfit) {
           url ??= new Promise(resolve => sheet.toBlob(resolve, 'image/png')).then(blob => URL.createObjectURL(blob));
           return url;
         }};
-    })());
-  }
-  return outfitCache.get(key);
+  })());
 }

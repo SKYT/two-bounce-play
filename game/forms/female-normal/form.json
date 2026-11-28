@@ -1,74 +1,64 @@
 {
   "name": "여성 · 노말 (쌔미 기준)",
   "detailScale": 2,
-  "body": "body.png",
+  "body": "body.webp",
   "heads": {
     "saemi": {
       "name": "쌔미 머리",
-      "sheet": "heads/saemi.png",
+      "sheet": "heads/saemi.webp",
       "mask": "heads/saemi-mask.png"
     },
     "head": {
       "name": "갈색 하이 포니테일 · 아이보리 헤어밴드",
-      "sheet": "heads/head.png",
+      "sheet": "heads/head.webp",
       "mask": "heads/head-mask.png"
     },
     "braid": {
       "name": "흑갈색 외줄 땋은 머리 · 진홍 끈",
-      "sheet": "heads/braid.png",
+      "sheet": "heads/braid.webp",
       "mask": "heads/braid-mask.png"
     },
     "bob": {
       "name": "단발",
-      "sheet": "heads/bob.png",
+      "sheet": "heads/bob.webp",
       "mask": "heads/bob-mask.png"
     }
   },
   "tops": {
     "cherry": {
       "name": "체리 탱크톱",
-      "sheet": "cherry.png"
+      "sheet": "cherry.webp"
     },
     "mint": {
       "name": "네이비 민트 크롭티",
-      "sheet": "mint.png"
+      "sheet": "mint.webp"
     },
     "crimson": {
       "name": "진홍 크롭탑",
-      "sheet": "crimson.png"
+      "sheet": "crimson.webp"
     },
     "saemi-top": {
       "name": "자주 탱크톱",
-      "sheet": "saemi-top.png"
+      "sheet": "saemi-top.webp"
     }
   },
   "bottoms": {
     "pleats": {
       "name": "플리츠스커트",
-      "sheet": "pleats.png"
+      "sheet": "pleats.webp"
     },
     "graphite": {
       "name": "그래파이트 트랙팬츠",
-      "sheet": "graphite.png"
+      "sheet": "graphite.webp"
     },
     "leggings": {
       "name": "진홍 라인 레깅스",
-      "sheet": "leggings.png"
+      "sheet": "leggings.webp"
     },
     "saemi-bottom": {
       "name": "자주 쇼츠",
-      "sheet": "saemi-bottom.png"
+      "sheet": "saemi-bottom.webp"
     }
-  },
-  "cover": {
-    "top": "cover/top.png",
-    "bottom": "cover/bottom.png",
-    "chest": "cover/chest.png",
-    "groin": "cover/groin.png",
-    "accessory": "cover/accessory.png",
-    "hair": "cover/hair.png",
-    "arms": "cover/arms.png",
-    "from": "part-map.png"
   },
   "layers": {
     "front": "layers/front.png",
