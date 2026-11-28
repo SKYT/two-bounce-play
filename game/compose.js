@@ -5,6 +5,8 @@
 // The pure functions work on {width, height, data} RGBA images so Node tests can compare them with
 // scripts/compose-mannequin.py pixel for pixel. Only composeOutfit() touches the DOM.
 
+import {recolor} from './recolor.js?v=aa18cfd';
+
 // Patch alpha: 0 keeps the pixel underneath, 128 clears it, 255 replaces it.
 export function applyPatch(base, part) {
   const out = new Uint8ClampedArray(base.data);
@@ -114,7 +116,9 @@ export function bakeMotion(outfit, mask, motion, amplitude, size, columns) {
 // form: parsed form.json with images already decoded. outfit: {top, bottom, head}.
 export function buildOutfit(form, outfit) {
   const {rig, images} = form;
-  const top = images.tops[outfit.top], bottom = images.bottoms[outfit.bottom];
+  // colour variants (game/recolor.js) are made from the part itself: same pixels, another hue
+  const top = recolor(images.tops[outfit.top], outfit.colors?.top);
+  const bottom = recolor(images.bottoms[outfit.bottom], outfit.colors?.bottom);
   // the mannequin is a featureless base layer: it is never shown without a top and a bottom (basic underwear at least)
   if (!top || !bottom) throw new Error(`outfit needs a top and a bottom: ${outfit.top} / ${outfit.bottom}`);
   // default: a top is worn over the bottom; a tucked top or an over-top bottom (long skirt, dress) swaps them
@@ -182,7 +186,8 @@ export function prefetchParts(form, outfits) {
 
 // Returns canvases ready for drawImage plus an object URL for CSS portraits; cached per outfit.
 export async function composeOutfit(form, outfit) {
-  const key = form.base.href + '|' + outfit.top + '|' + outfit.bottom + '|' + (outfit.head ?? '');
+  const key = form.base.href + '|' + outfit.top + '|' + outfit.bottom + '|' + (outfit.head ?? '') + '|' +
+    (outfit.colors?.top ?? '') + '|' + (outfit.colors?.bottom ?? '');
   if (!outfitCache.has(key)) {
     outfitCache.set(key, (async () => {
       const built = buildOutfit(await partsFor(form, outfit), outfit);

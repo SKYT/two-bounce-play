@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=7bec02c';
-import {composeOutfit, prefetchParts} from './compose.js?v=7bec02c';
+import {asset} from './version.js?v=aa18cfd';
+import {composeOutfit, prefetchParts} from './compose.js?v=aa18cfd';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
@@ -61,7 +61,8 @@ export function resolveFormPlayer(id, data, form) {
   }
   const costumes = [];
   for (const top of data.wardrobe.top) for (const bottom of data.wardrobe.bottom) {
-    costumes.push({id: top + '-' + bottom, name: wardrobe.top[top] + ' · ' + wardrobe.bottom[bottom], top, bottom, head});
+    costumes.push({id: top + '-' + bottom, name: wardrobe.top[top] + ' · ' + wardrobe.bottom[bottom], top, bottom, head,
+      ...(data.colors ? {colors: data.colors} : {})});
   }
   return {...form.rig, ...data, poses: {...form.rig.poses, ...data.poses}, id, wardrobe, costumes, atlas: null,
     cellSize: form.rig.cellSize * scale, flightMotion: data.flightMotion ?? form.motion?.flight, composed: form};

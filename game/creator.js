@@ -1,15 +1,15 @@
 // Creator screen: make "my player" from a shared form's parts. Every change is composed live on its own stage
 // with the game's own code. Saving stores the recipe on the device; the page reloads with the new player chosen.
-import {createPreview} from './preview.js?v=7bec02c';
+import {createPreview} from './preview.js?v=aa18cfd';
 import {formsOf, choicesOf, defaultRecipe, randomRecipe, validRecipe, recipeData, nextCustomId, MAX_CUSTOM, bodyLabel,
-  switchForm} from './custom.js?v=7bec02c';
-import {resolveFormPlayer, outfitArt} from './players.js?v=7bec02c';
-import {rosterBars} from './stats.js?v=7bec02c';
-import {showStats} from './home.js?v=7bec02c';
-import {stored} from './storage.js?v=7bec02c';
+  switchForm} from './custom.js?v=aa18cfd';
+import {resolveFormPlayer, outfitArt} from './players.js?v=aa18cfd';
+import {rosterBars} from './stats.js?v=aa18cfd';
+import {showStats} from './home.js?v=aa18cfd';
+import {stored} from './storage.js?v=aa18cfd';
 
-const GROUPS = [['head', 'heads', '머리'], ['top', 'tops', '상의'], ['bottom', 'bottoms', '하의'],
-  ['hand', 'hands', '슛 손'], ['rhythm', 'rhythms', '슛 리듬'], ['height', 'heights', '키']];
+const GROUPS = [['head', 'heads', '머리'], ['top', 'tops', '상의'], ['topColor', 'colors', '상의 색'], ['bottom', 'bottoms', '하의'],
+  ['bottomColor', 'colors', '하의 색'], ['hand', 'hands', '슛 손'], ['rhythm', 'rhythms', '슛 리듬'], ['height', 'heights', '키']];
 
 export function setupCreator({roster, ballStyle, els, onDone, onClose}) {
   const forms = formsOf(roster);
@@ -26,6 +26,7 @@ export function setupCreator({roster, ballStyle, els, onDone, onClose}) {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = option.name;
+      if (option.swatch) { button.classList.add('swatch'); button.style.setProperty('--swatch', option.swatch); }
       button.setAttribute('aria-pressed', String(isOn(option)));
       button.onclick = () => pick(option);
       box.append(button);
@@ -43,7 +44,9 @@ export function setupCreator({roster, ballStyle, els, onDone, onClose}) {
     }
     for (const [key, list, label] of GROUPS) {
       if (!choices[list].length) continue;
-      group(label, choices[list], o => recipe[key] === o.id, o => { recipe = {...recipe, [key]: o.id}; update(); });
+      // colour '' (as drawn) is stored as no colour at all
+      group(label, choices[list], o => (recipe[key] ?? '') === o.id,
+        o => { recipe = {...recipe, [key]: o.id || undefined}; update(); });
     }
   }
 

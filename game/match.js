@@ -1,4 +1,4 @@
-import {rules} from './defaults.js?v=7bec02c';
+import {rules} from './defaults.js?v=aa18cfd';
 
 const freeThrow = {x:200,y:330};
 const basket = {x:200,y:105};
