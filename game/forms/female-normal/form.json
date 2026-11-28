@@ -1,0 +1,82 @@
+{
+  "name": "여성 · 노말 (쌔미 기준)",
+  "detailScale": 2,
+  "body": "body.png",
+  "heads": {
+    "saemi": {
+      "name": "쌔미 머리",
+      "sheet": "heads/saemi.png",
+      "mask": "heads/saemi-mask.png"
+    },
+    "head": {
+      "name": "갈색 하이 포니테일 · 아이보리 헤어밴드",
+      "sheet": "heads/head.png",
+      "mask": "heads/head-mask.png"
+    },
+    "braid": {
+      "name": "흑갈색 외줄 땋은 머리 · 진홍 끈",
+      "sheet": "heads/braid.png",
+      "mask": "heads/braid-mask.png"
+    },
+    "bob": {
+      "name": "단발",
+      "sheet": "heads/bob.png",
+      "mask": "heads/bob-mask.png"
+    }
+  },
+  "tops": {
+    "cherry": {
+      "name": "체리 탱크톱",
+      "sheet": "cherry.png"
+    },
+    "mint": {
+      "name": "네이비 민트 크롭티",
+      "sheet": "mint.png"
+    },
+    "crimson": {
+      "name": "진홍 크롭탑",
+      "sheet": "crimson.png"
+    },
+    "saemi-top": {
+      "name": "자주 탱크톱",
+      "sheet": "saemi-top.png"
+    }
+  },
+  "bottoms": {
+    "pleats": {
+      "name": "플리츠스커트",
+      "sheet": "pleats.png"
+    },
+    "graphite": {
+      "name": "그래파이트 트랙팬츠",
+      "sheet": "graphite.png"
+    },
+    "leggings": {
+      "name": "진홍 라인 레깅스",
+      "sheet": "leggings.png"
+    },
+    "saemi-bottom": {
+      "name": "자주 쇼츠",
+      "sheet": "saemi-bottom.png"
+    }
+  },
+  "cover": {
+    "top": "cover/top.png",
+    "bottom": "cover/bottom.png",
+    "chest": "cover/chest.png",
+    "groin": "cover/groin.png",
+    "accessory": "cover/accessory.png",
+    "hair": "cover/hair.png",
+    "arms": "cover/arms.png",
+    "from": "part-map.png"
+  },
+  "layers": {
+    "front": "layers/front.png",
+    "grip": "layers/grip.png",
+    "arms": {
+      "ballArm": "BBFBFFFFBFFFBBBB",
+      "guideArm": "FFFFBBBBFBFFFFFF"
+    }
+  },
+  "defaultHead": "saemi"
+}

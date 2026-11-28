@@ -1,11 +1,12 @@
 // Creator screen: make "my player" from a shared form's parts. Every change is composed live on its own stage
 // with the game's own code. Saving stores the recipe on the device; the page reloads with the new player chosen.
-import {createPreview} from './preview.js?v=1c51e47';
-import {formsOf, choicesOf, defaultRecipe, randomRecipe, validRecipe, recipeData, nextCustomId, MAX_CUSTOM} from './custom.js?v=1c51e47';
-import {resolveFormPlayer, outfitArt} from './players.js?v=1c51e47';
-import {rosterBars} from './stats.js?v=1c51e47';
-import {showStats} from './home.js?v=1c51e47';
-import {stored} from './storage.js?v=1c51e47';
+import {createPreview} from './preview.js?v=7bec02c';
+import {formsOf, choicesOf, defaultRecipe, randomRecipe, validRecipe, recipeData, nextCustomId, MAX_CUSTOM, bodyLabel,
+  switchForm} from './custom.js?v=7bec02c';
+import {resolveFormPlayer, outfitArt} from './players.js?v=7bec02c';
+import {rosterBars} from './stats.js?v=7bec02c';
+import {showStats} from './home.js?v=7bec02c';
+import {stored} from './storage.js?v=7bec02c';
 
 const GROUPS = [['head', 'heads', '머리'], ['top', 'tops', '상의'], ['bottom', 'bottoms', '하의'],
   ['hand', 'hands', '슛 손'], ['rhythm', 'rhythms', '슛 리듬'], ['height', 'heights', '키']];
@@ -16,24 +17,33 @@ export function setupCreator({roster, ballStyle, els, onDone, onClose}) {
   preview.pause();
   let recipe = null, editing = null, turn = 0;
 
+  function group(label, options, isOn, pick) {
+    const box = document.createElement('fieldset');
+    const legend = document.createElement('legend');
+    legend.textContent = label;
+    box.append(legend);
+    for (const option of options) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = option.name;
+      button.setAttribute('aria-pressed', String(isOn(option)));
+      button.onclick = () => pick(option);
+      box.append(button);
+    }
+    els.fields.append(box);
+  }
+
   function fields() {
     const entry = forms.get(recipe.form), choices = choicesOf(entry);
     els.fields.replaceChildren();
+    // body type = which shared form; the same part ids carry over to the other body
+    if (forms.size > 1) {
+      group('체형', [...forms.values()].map(f => ({id: f.id, name: bodyLabel(f.name)})), o => o.id === recipe.form,
+        o => { recipe = switchForm(recipe, forms.get(o.id)); update(); });
+    }
     for (const [key, list, label] of GROUPS) {
       if (!choices[list].length) continue;
-      const group = document.createElement('fieldset');
-      const legend = document.createElement('legend');
-      legend.textContent = label;
-      group.append(legend);
-      for (const option of choices[list]) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = option.name;
-        button.setAttribute('aria-pressed', String(recipe[key] === option.id));
-        button.onclick = () => { recipe = {...recipe, [key]: option.id}; update(); };
-        group.append(button);
-      }
-      els.fields.append(group);
+      group(label, choices[list], o => recipe[key] === o.id, o => { recipe = {...recipe, [key]: o.id}; update(); });
     }
   }
 

@@ -21,7 +21,27 @@ export function formsOf(roster) {
     timing.poses = {flight: spec.poses.flight};
     forms.get(form.id).rhythms.push({id: spec.id, name: spec.name + ' 리듬', timing});
   }
-  return forms;
+  // body types in their natural order (slim → glamour), so the creator lists them that way and opens on the first
+  const rank = entry => {
+    const i = BODY_ORDER.indexOf(bodyLabel(entry.name));
+    return i < 0 ? BODY_ORDER.length : i;
+  };
+  return new Map([...forms.entries()].sort(([, a], [, b]) => rank(a) - rank(b)));
+}
+
+// "여성 · 노말 (쌔미 기준)" → "노말": the build part of a form's name, shown as the creator's body choice.
+export const BODY_ORDER = ['왜소형', '마른몸', '노멀', '노말', '중간', '건강 볼륨', '근육형', '글래머'];
+export function bodyLabel(name = '') {
+  return name.split('·').pop().replace(/\(.*\)/, '').trim() || name;
+}
+
+// Another body type, keeping every choice the new form also offers (same part ids are the same garment).
+export function switchForm(recipe, entry) {
+  const c = choicesOf(entry), keep = (list, id, fallback) => list.some(x => x.id === id) ? id : fallback;
+  return {...recipe, form: entry.id,
+    head: c.heads.length ? keep(c.heads, recipe.head, entry.form.defaultHead ?? c.heads[0].id) : undefined,
+    top: keep(c.tops, recipe.top, c.tops[0].id), bottom: keep(c.bottoms, recipe.bottom, c.bottoms[0].id),
+    rhythm: keep(c.rhythms, recipe.rhythm, c.rhythms[0].id)};
 }
 
 export function choicesOf(entry) {
