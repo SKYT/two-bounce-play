@@ -1,13 +1,28 @@
 // Home screen: player cards, outfit buttons and the remembered choice. It knows nothing about the match.
-import {initialPlayer, costumesOf, initialCostume, outfitArt} from './players.js?v=866d6cd';
+import {initialPlayer, costumesOf, initialCostume, outfitArt, prefetchWardrobe} from './players.js?v=1c3e330';
 
 const playerKey = 'two-bounce:player';
 const costumeKey = id => 'two-bounce:costume:' + id;
 const load = key => { try { return localStorage.getItem(key); } catch { return null; } };
 const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
 
-// url may be a promise: composed outfits are built in the browser before they can be shown.
-function portrait(spec, url) {
+// A portrait comes from the published portrait sheet when it exists, otherwise from the player's own sheet
+// (url may be a promise: composed outfits are built in the browser first).
+function portraitFromSheet(sheet, key) {
+  const index = sheet?.entries[key];
+  if (index == null) return null;
+  const span = document.createElement('span');
+  span.className = 'portrait';
+  span.setAttribute('aria-hidden', 'true');
+  const col = index % sheet.columns, row = Math.floor(index / sheet.columns);
+  span.style.backgroundImage = 'url("' + sheet.url.href + '")';
+  span.style.backgroundSize = (sheet.columns * 100) + '% ' + (sheet.rows * 100) + '%';
+  span.style.backgroundPosition = (sheet.columns > 1 ? col / (sheet.columns - 1) * 100 : 0) + '% ' +
+    (sheet.rows > 1 ? row / (sheet.rows - 1) * 100 : 0) + '%';
+  return span;
+}
+
+function portraitFromAtlas(spec, url) {
   const span = document.createElement('span');
   span.className = 'portrait';
   if (spec.cellSize > spec.drawSize) span.style.imageRendering = 'auto';
@@ -16,15 +31,20 @@ function portrait(spec, url) {
   Promise.resolve(url).then(href => { span.style.backgroundImage = 'url("' + href + '")'; }).catch(() => {});
   return span;
 }
-const firstArt = spec => outfitArt(spec, costumesOf(spec)[0].id).then(art => art.url);
 
 // onChoose(id, costumeId, spec) runs for every choice; it returns a promise that settles when the player is ready.
 // remember() stores the choice once the player has loaded.
-export function setupHome({roster, cardsBox, costumesBox, costumeName, query, onChoose}) {
+export function setupHome({roster, portraits, cardsBox, costumesBox, costumeName, query, onChoose}) {
+  const portrait = (id, costumeId) => {
+    const spec = roster.get(id), costume = costumeId ?? costumesOf(spec)[0].id;
+    return portraitFromSheet(portraits, costume === 'base' ? id : id + '/' + costume) ||
+      portraitFromSheet(portraits, id) ||
+      portraitFromAtlas(spec, outfitArt(spec, costume).then(art => art.url));
+  };
   const cards = new Map();
   for (const [id, spec] of roster) {
     const card = document.createElement('button');
-    card.append(portrait(spec, firstArt(spec)), spec.name);
+    card.append(portrait(id), spec.name);
     card.onclick = () => choose(id, true);
     cards.set(id, card);
     cardsBox.append(card);
@@ -39,7 +59,7 @@ export function setupHome({roster, cardsBox, costumesBox, costumeName, query, on
     costumeName.textContent = selected.name;
     if (spec.wardrobe) {
       const card = cards.get(id);
-      card.replaceChildren(portrait(spec, outfitArt(spec, selected.id).then(art => art.url)), spec.name);
+      card.replaceChildren(portrait(id, selected.id), spec.name);
       for (const [slot, label] of [['top', '상의'], ['bottom', '하의']]) {
         const group = document.createElement('fieldset');
         const legend = document.createElement('legend');
@@ -61,7 +81,7 @@ export function setupHome({roster, cardsBox, costumesBox, costumeName, query, on
     }
     for (const costume of list) {
       const chip = document.createElement('button');
-      chip.append(portrait(spec, outfitArt(spec, costume.id).then(art => art.url)));
+      chip.append(portrait(id, costume.id));
       chip.title = costume.name;
       chip.setAttribute('aria-label', costume.name);
       chip.setAttribute('aria-pressed', String(costume.id === chosen));
@@ -84,6 +104,7 @@ export function setupHome({roster, cardsBox, costumesBox, costumeName, query, on
     if (turn !== latest) return; // a newer choice was made while this outfit was being built
     if (!art) return onChoose(null, retry);
     const ready = await onChoose({...base, ...art}, retry);
+    if (ready) prefetchWardrobe(base);
     if (ready && remember) {
       save(playerKey, id);
       if (costumesOf(base).length > 1) save(costumeKey(id), costume);

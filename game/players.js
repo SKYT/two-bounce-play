@@ -1,7 +1,7 @@
 // Players are data: game/players/index.json lists them, game/players/<id>/player.json describes each one.
 // Adding a player or an outfit never needs a code change.
-import {asset} from './version.js?v=866d6cd';
-import {composeOutfit} from './compose.js?v=866d6cd';
+import {asset} from './version.js?v=1c3e330';
+import {composeOutfit, prefetchParts} from './compose.js?v=1c3e330';
 
 const home = new URL('./players/', import.meta.url);
 const forms = new URL('./forms/', import.meta.url);
@@ -75,18 +75,40 @@ export async function outfitArt(spec, costumeId) {
   return {url: costume.atlas.href, atlas: costume.atlas, motionAtlas: costume.motionAtlas ?? spec.motionAtlas ?? null};
 }
 
+export function prefetchWardrobe(spec) {
+  if (spec.composed) prefetchParts(spec.composed, spec.costumes);
+}
+
 export async function loadRoster(base = home, formBase = forms) {
   const index = await readJson(asset('index.json', base));
   const formCache = new Map();
+  // One broken player.json or form must not take the whole roster down: skip it and say why.
   const entries = await Promise.all(index.order.map(async id => {
-    const data = await readJson(asset(id + '/player.json', base));
-    if (!data.form) return [id, resolvePlayer(id, data, new URL(id + '/', base))];
-    if (!formCache.has(data.form)) formCache.set(data.form, loadForm(data.form, formBase));
-    return [id, resolveFormPlayer(id, data, await formCache.get(data.form))];
+    try {
+      const data = await readJson(asset(id + '/player.json', base));
+      if (!data.form) return [id, resolvePlayer(id, data, new URL(id + '/', base))];
+      if (!formCache.has(data.form)) formCache.set(data.form, loadForm(data.form, formBase));
+      return [id, resolveFormPlayer(id, data, await formCache.get(data.form))];
+    } catch (error) {
+      console.warn(`player ${id} skipped:`, error);
+      return null;
+    }
   }));
-  const roster = new Map(entries);
+  const roster = new Map(entries.filter(Boolean));
+  if (!roster.size) throw new Error('no player could be loaded');
   roster.defaultId = roster.has(index.default) ? index.default : index.order[0];
   return roster;
+}
+
+// Home-screen portraits: one sheet built when publishing (scripts/build-portraits.py). Missing in a
+// source checkout; the home screen then falls back to each player's own sheet.
+export async function loadPortraits(base = home) {
+  try {
+    const meta = await readJson(asset('portraits.json', base));
+    return {...meta, url: asset('portraits.webp', base)};
+  } catch {
+    return null;
+  }
 }
 
 export function initialPlayer(roster, requested, saved) {

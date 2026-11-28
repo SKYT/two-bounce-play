@@ -120,20 +120,26 @@ function toCanvas(image) {
   return canvas;
 }
 
-const formCache = new Map(), outfitCache = new Map();
+const decoded = new Map(), outfitCache = new Map();
+const decodeOnce = url => {
+  if (!decoded.has(url.href)) decoded.set(url.href, decode(url));
+  return decoded.get(url.href);
+};
 
-export async function loadForm(form) {
-  if (!formCache.has(form.base.href)) {
-    formCache.set(form.base.href, (async () => {
-      const pick = map => Promise.all(Object.entries(map || {}).map(async ([id, url]) => [id, await decode(url)]))
-        .then(Object.fromEntries);
-      const [body, tops, bottoms, heads, headMasks, motionMasks] = await Promise.all([
-        decode(form.urls.body), pick(form.urls.tops), pick(form.urls.bottoms),
-        pick(form.urls.heads), pick(form.urls.headMasks), pick(form.urls.motionMasks)]);
-      return {...form, images: {body, tops, bottoms, heads, headMasks, motionMasks}};
-    })());
-  }
-  return formCache.get(form.base.href);
+// Fetch only what this outfit uses: body, its top and bottom, its head and the top's motion mask.
+async function partsFor(form, outfit) {
+  const head = outfit.head ?? form.defaultHead, {urls} = form;
+  const one = async (map, id) => (map[id] ? {[id]: await decodeOnce(map[id])} : {});
+  const [body, tops, bottoms, heads, headMasks, motionMasks] = await Promise.all([
+    decodeOnce(urls.body), one(urls.tops, outfit.top), one(urls.bottoms, outfit.bottom),
+    one(urls.heads, head), one(urls.headMasks, head), one(urls.motionMasks, outfit.top)]);
+  return {...form, images: {body, tops, bottoms, heads, headMasks, motionMasks}};
+}
+
+// After a form player is shown, fetch the rest of their wardrobe in the background so switching is instant.
+export function prefetchParts(form, outfits) {
+  const later = globalThis.requestIdleCallback || (fn => setTimeout(fn, 300));
+  later(() => outfits.forEach(outfit => partsFor(form, outfit).catch(() => {})));
 }
 
 // Returns canvases ready for drawImage plus an object URL for CSS portraits; cached per outfit.
@@ -141,10 +147,14 @@ export async function composeOutfit(form, outfit) {
   const key = form.base.href + '|' + outfit.top + '|' + outfit.bottom + '|' + (outfit.head ?? '');
   if (!outfitCache.has(key)) {
     outfitCache.set(key, (async () => {
-      const built = buildOutfit(await loadForm(form), outfit);
+      const built = buildOutfit(await partsFor(form, outfit), outfit);
       const sheet = toCanvas(built.sheet);
-      const blob = await new Promise(resolve => sheet.toBlob(resolve, 'image/png'));
-      return {sheet, motion: built.motion && toCanvas(built.motion), cellSize: built.cellSize, url: URL.createObjectURL(blob)};
+      let url; // PNG encoding is slow: only when a portrait actually needs this outfit as an image URL
+      return {sheet, motion: built.motion && toCanvas(built.motion), cellSize: built.cellSize,
+        get url() {
+          url ??= new Promise(resolve => sheet.toBlob(resolve, 'image/png')).then(blob => URL.createObjectURL(blob));
+          return url;
+        }};
     })());
   }
   return outfitCache.get(key);
