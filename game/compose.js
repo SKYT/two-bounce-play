@@ -101,6 +101,8 @@ export function bakeMotion(outfit, mask, motion, amplitude, size, columns) {
 export function buildOutfit(form, outfit) {
   const {rig, images} = form;
   const top = images.tops[outfit.top], bottom = images.bottoms[outfit.bottom];
+  // the mannequin is a featureless base layer: it is never shown without a top and a bottom (basic underwear at least)
+  if (!top || !bottom) throw new Error(`outfit needs a top and a bottom: ${outfit.top} / ${outfit.bottom}`);
   // default: a top is worn over the bottom; a tucked top or an over-top bottom (long skirt, dress) swaps them
   const bottomOver = form.tops[outfit.top]?.tucked || form.bottoms[outfit.bottom]?.layer === 'over-top';
   let uniform = bottomOver ? applyPatch(applyPatch(images.body, top), bottom) : applyPatch(applyPatch(images.body, bottom), top);

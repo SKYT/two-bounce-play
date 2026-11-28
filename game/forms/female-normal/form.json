@@ -52,6 +52,8 @@
   "cover": {
     "top": "cover/top.png",
     "bottom": "cover/bottom.png",
+    "chest": "cover/chest.png",
+    "groin": "cover/groin.png",
     "accessory": "cover/accessory.png",
     "hair": "cover/hair.png",
     "arms": "cover/arms.png",
